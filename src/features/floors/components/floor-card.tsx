@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { Pencil, Trash2 } from 'lucide-react';
 
 import type { Floor } from '../types/floor';
@@ -7,7 +8,11 @@ type Props = {
 };
 
 export function FloorCard({ floor }: Props) {
+  // Tính phần trăm đã sử dụng
   const occupiedPercent = Math.round((floor.occupiedSlots / floor.totalSlots) * 100);
+
+  // Tính số slot còn trống
+  const availableSlots = floor.totalSlots - floor.occupiedSlots;
 
   return (
     <div className="rounded-3xl border bg-white p-6 shadow-sm">
@@ -19,6 +24,7 @@ export function FloorCard({ floor }: Props) {
           <p className="text-sm text-slate-500">{floor.description}</p>
         </div>
 
+        {/* Nút chỉnh sửa / xoá */}
         <div className="flex gap-2">
           <button>
             <Pencil size={18} />
@@ -30,28 +36,30 @@ export function FloorCard({ floor }: Props) {
         </div>
       </div>
 
-      {/* Thống kê tầng */}
+      {/* Thống kê */}
       <div className="space-y-3">
         <div className="flex justify-between">
           <span>Total Slots</span>
-
           <span className="font-semibold">{floor.totalSlots}</span>
         </div>
 
         <div className="flex justify-between">
           <span>Occupied</span>
-
           <span className="font-semibold text-red-500">{floor.occupiedSlots}</span>
         </div>
 
         <div className="flex justify-between">
-          <span>Availability</span>
+          <span>Available Slots</span>
+          <span className="font-semibold text-emerald-600">{availableSlots}</span>
+        </div>
 
+        <div className="flex justify-between">
+          <span>Availability</span>
           <span className="font-semibold text-green-600">{floor.availability}%</span>
         </div>
       </div>
 
-      {/* Progress */}
+      {/* Progress bar */}
       <div className="mt-5">
         <div className="h-3 overflow-hidden rounded-full bg-slate-200">
           <div
@@ -79,7 +87,10 @@ export function FloorCard({ floor }: Props) {
           {floor.status}
         </span>
 
-        <button className="font-medium text-blue-900">View Map</button>
+        {/* Route động theo floor.id */}
+        <Link to={`/slots/${floor.id}`} className="font-medium text-blue-900 hover:underline">
+          View Slots
+        </Link>
       </div>
     </div>
   );
