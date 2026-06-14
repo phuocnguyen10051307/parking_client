@@ -1,7 +1,7 @@
 // Kiểu dữ liệu cho từng tầng
 
 export interface Floor {
-  id: number;
+  id: string;
   name: string;
   description: string;
   totalSlots: number;

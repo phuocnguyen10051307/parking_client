@@ -1,10 +1,9 @@
 import type { Floor } from '../types/floor';
 
-// Mock data để hiển thị UI
-
+// Mock data tầng
 export const floorData: Floor[] = [
   {
-    id: 1,
+    id: 'basement-1',
     name: 'Basement 1',
     description: 'Priority Access / Long-term',
     totalSlots: 250,
@@ -13,7 +12,7 @@ export const floorData: Floor[] = [
     status: 'Operational',
   },
   {
-    id: 2,
+    id: 'level-1',
     name: 'Level 1',
     description: 'Short-term / Visitor',
     totalSlots: 350,
@@ -22,7 +21,7 @@ export const floorData: Floor[] = [
     status: 'Near Capacity',
   },
   {
-    id: 3,
+    id: 'level-2',
     name: 'Level 2',
     description: 'Corporate Reserved',
     totalSlots: 300,
@@ -31,7 +30,7 @@ export const floorData: Floor[] = [
     status: 'Operational',
   },
   {
-    id: 4,
+    id: 'level-3',
     name: 'Level 3',
     description: 'EV Charging Hub',
     totalSlots: 350,
