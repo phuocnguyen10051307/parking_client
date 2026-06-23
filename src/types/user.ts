@@ -1,10 +1,12 @@
+import type { UserRole } from '@/types/user-role';
+
 export interface User {
   id: string;
   fullName: string;
   email: string;
   phone: string | null;
   avatarUrl: string | null;
-  role: string;
+  role: UserRole;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;

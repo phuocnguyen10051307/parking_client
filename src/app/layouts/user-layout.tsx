@@ -1,25 +1,24 @@
-import { Outlet, Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-import { authApi } from '@/features/auth/api/auth-api';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+
+import { authApi } from '@/features/auth/api/auth-api';
+import { clearAuthSession, getStoredUser } from '@/features/auth/utils/auth-session';
 
 export function UserLayout() {
   const navigate = useNavigate();
+  const user = getStoredUser();
 
-  // Logout
   const handleLogout = () => {
     toast('Do you want to logout?', {
       action: {
         label: 'Logout',
         onClick: async () => {
-          //gọi api logout
-          await authApi.signout();
-
-          //xóa local storage
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('user');
-
-          navigate('/login');
+          try {
+            await authApi.signout();
+          } finally {
+            clearAuthSession();
+            navigate('/login');
+          }
         },
       },
     });
@@ -27,17 +26,17 @@ export function UserLayout() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Navbar cho driver */}
       <header className="flex items-center justify-between border-b bg-white px-8 py-4">
-        <Link to="/" className="text-xl font-bold text-blue-900">
+        <Link to="/my-profile" className="text-xl font-bold text-blue-900">
           CityPark
         </Link>
 
         <nav className="flex items-center gap-6">
-          <Link to="/my-profile">Profile</Link>
-          <Link to="/my-vehicles">My Vehicles</Link>
-          <Link to="/my-reservations">Reservations</Link>
-          <Link to="/my-history">History</Link>
+          <Link to="/my-profile" className="font-medium text-slate-700 transition hover:text-blue-900">
+            Profile
+          </Link>
+
+          <span className="text-sm text-slate-500">{user?.fullName || user?.email || 'Customer'}</span>
 
           <button
             onClick={handleLogout}
@@ -48,7 +47,6 @@ export function UserLayout() {
         </nav>
       </header>
 
-      {/* Nội dung từng page */}
       <main className="mx-auto max-w-6xl p-8">
         <Outlet />
       </main>
