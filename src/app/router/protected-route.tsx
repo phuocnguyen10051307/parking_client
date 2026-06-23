@@ -1,18 +1,26 @@
 import { Navigate } from 'react-router-dom';
 
+import { getStoredAccessToken, getStoredUser } from '@/features/auth/utils/auth-session';
+import type { UserRole } from '@/types/user-role';
+
+import { canAccessRole, getDefaultRouteByRole } from './rbac-config';
+
 type Props = {
+  allowedRoles?: UserRole[];
   children: React.ReactNode;
 };
 
-export function ProtectedRoute({ children }: Props) {
-  // Lấy access token từ localStorage
-  const token = localStorage.getItem('accessToken');
+export function ProtectedRoute({ allowedRoles, children }: Props) {
+  const token = getStoredAccessToken();
+  const user = getStoredUser();
 
-  // Nếu chưa đăng nhập -> đá về login
-  if (!token) {
+  if (!token || !user) {
     return <Navigate to="/login" replace />;
   }
 
-  // Nếu có token -> render page
+  if (allowedRoles && !canAccessRole(user.role, allowedRoles)) {
+    return <Navigate to={getDefaultRouteByRole(user.role)} replace />;
+  }
+
   return children;
 }

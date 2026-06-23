@@ -1,23 +1,25 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 
-import { AuthRouter } from './auth-router';
+import { getStoredUser } from '@/features/auth/utils/auth-session';
+
 import { AdminRouter } from './admin-router';
+import { AuthRouter } from './auth-router';
+import { getDefaultRouteByRole } from './rbac-config';
 import { UserRouter } from './user-router';
+
+function AppFallback() {
+  const user = getStoredUser();
+
+  return <Navigate to={getDefaultRouteByRole(user?.role)} replace />;
+}
 
 export function AppRouter() {
   return (
     <Routes>
-      {/* Auth routes */}
       {AuthRouter()}
-
-      {/* Admin routes */}
       {AdminRouter()}
-
-      {/* User routes */}
       {UserRouter()}
-
-      {/* fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<AppFallback />} />
     </Routes>
   );
 }
