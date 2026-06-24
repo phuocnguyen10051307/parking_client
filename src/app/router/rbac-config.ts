@@ -43,6 +43,9 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
   { path: '/reports', allowedRoles: MANAGEMENT_ROLES },
   { path: '/profile', allowedRoles: ALL_STAFF_ROLES },
   { path: '/my-profile', allowedRoles: ['USER'] },
+  { path: '/my-vehicles', allowedRoles: ['USER'] },
+  { path: '/my-reservations', allowedRoles: ['USER'] },
+  { path: '/my-history', allowedRoles: ['USER'] },
 ];
 
 export const SIDEBAR_MENUS: SidebarMenuItem[] = [
@@ -103,7 +106,7 @@ export function getDefaultRouteByRole(role: string | null | undefined) {
   const normalizedRole = normalizeRole(role);
 
   if (normalizedRole === 'USER') {
-    return '/my-profile';
+    return '/user';
   }
 
   if (normalizedRole) {

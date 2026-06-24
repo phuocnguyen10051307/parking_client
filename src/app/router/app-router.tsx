@@ -9,8 +9,8 @@ import { UserRouter } from './user-router';
 
 function AppFallback() {
   const user = getStoredUser();
-
-  return <Navigate to={getDefaultRouteByRole(user?.role)} replace />;
+  const target = getDefaultRouteByRole(user?.role);
+  return <Navigate to={target} replace />;
 }
 
 export function AppRouter() {

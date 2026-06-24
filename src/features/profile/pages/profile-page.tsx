@@ -33,7 +33,7 @@ export default function ProfilePage() {
         const user = await profileApi.getProfile();
 
         setProfile({
-          fullName: user.displayName || '',
+          fullName: user.fullName || '',
           email: user.email || '',
           phone: user.phone || '',
           avatarUrl: user.avatarUrl || '',

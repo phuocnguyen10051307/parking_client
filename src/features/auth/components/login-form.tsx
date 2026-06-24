@@ -69,9 +69,12 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
       const res = await authApi.signin(form);
       const { accessToken, user } = res.data;
 
+      console.log('[LoginForm] Signin success', { role: user.role, email: user.email });
       persistAuthSession(accessToken, user);
       toast.success('Login successfully');
-      navigate(getDefaultRouteByRole(user.role));
+      const targetRoute = getDefaultRouteByRole(user.role);
+      console.log('[LoginForm] Navigating to', { targetRoute });
+      navigate(targetRoute);
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         const message = error.response?.data?.message;

@@ -27,16 +27,46 @@ export function UserLayout() {
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="flex items-center justify-between border-b bg-white px-8 py-4">
-        <Link to="/my-profile" className="text-xl font-bold text-blue-900">
+        <Link to="/user" className="text-xl font-bold text-blue-900">
           CityPark
         </Link>
 
         <nav className="flex items-center gap-6">
-          <Link to="/my-profile" className="font-medium text-slate-700 transition hover:text-blue-900">
+          <Link to="/user" className="font-medium text-slate-700 transition hover:text-blue-900">
+            Dashboard
+          </Link>
+
+          <Link
+            to="/user/my-profile"
+            className="font-medium text-slate-700 transition hover:text-blue-900"
+          >
             Profile
           </Link>
 
-          <span className="text-sm text-slate-500">{user?.fullName || user?.email || 'Customer'}</span>
+          <Link
+            to="/user/my-vehicles"
+            className="font-medium text-slate-700 transition hover:text-blue-900"
+          >
+            My Vehicles
+          </Link>
+
+          <Link
+            to="/user/my-reservations"
+            className="font-medium text-slate-700 transition hover:text-blue-900"
+          >
+            Reservations
+          </Link>
+
+          <Link
+            to="/user/my-history"
+            className="font-medium text-slate-700 transition hover:text-blue-900"
+          >
+            History
+          </Link>
+
+          <span className="text-sm text-slate-500">
+            {user?.fullName || user?.email || 'Customer'}
+          </span>
 
           <button
             onClick={handleLogout}

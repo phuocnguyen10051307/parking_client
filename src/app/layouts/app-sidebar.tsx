@@ -53,7 +53,9 @@ export function AppSidebar() {
       <nav className="flex-1 overflow-y-auto p-4">
         {visibleMenus.map((menu) => {
           const Icon = menu.icon;
-          const isActive = menu.activeMatchers?.some((matcher) => location.pathname.startsWith(matcher))
+          const isActive = menu.activeMatchers?.some((matcher) =>
+            location.pathname.startsWith(matcher)
+          )
             ? true
             : location.pathname === menu.path;
 
