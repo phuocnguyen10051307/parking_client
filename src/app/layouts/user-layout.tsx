@@ -64,9 +64,13 @@ export function UserLayout() {
             History
           </Link>
 
-          <span className="text-sm text-slate-500">
-            {user?.fullName || user?.email || 'Customer'}
-          </span>
+          <div className="flex flex-col text-right">
+            {/* Tên ở trên */}
+            <span className="font-medium text-slate-800">{user?.displayName || 'Customer'}</span>
+
+            {/* Email ở dưới */}
+            <span className="text-xs text-slate-500">{user?.email}</span>
+          </div>
 
           <button
             onClick={handleLogout}

@@ -78,11 +78,11 @@ export function AppSidebar() {
         <Link to="/profile" className="block rounded-xl p-2 transition hover:bg-slate-50">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 font-semibold text-blue-900">
-              {getUserInitials(user?.fullName)}
+              {getUserInitials(user?.displayName)}
             </div>
 
             <div>
-              <p className="font-medium">{user?.fullName || 'Parking User'}</p>
+              <p className="font-medium">{user?.displayName || 'Parking User'}</p>
               <p className="text-xs text-slate-500">{getRoleLabel(user?.role)}</p>
             </div>
           </div>
