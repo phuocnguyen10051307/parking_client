@@ -7,7 +7,7 @@ import { ParkingSessionTable } from '../components/parking-session-table';
 import { ParkingAiCard } from '../components/parking-ai-card';
 import { RevenueDistributionCard } from '../components/revenue-distribution-card';
 
-export default function ParkingSessionsPage() {
+export default function ParkingSessionsManagementPage() {
   return (
     <DashboardLayout>
       <div className="space-y-8">
@@ -16,15 +16,20 @@ export default function ParkingSessionsPage() {
           <div>
             <div className="text-3xl font-semibold text-blue-900">Session Ledger</div>
 
-            <p className="mt-2 text-lg text-slate-500">Monitor all parking sessions in real time</p>
+            <p className="mt-2 text-lg text-slate-500">
+              Theo dõi toàn bộ parking sessions theo thời gian thực
+            </p>
           </div>
 
+          {/* Action buttons */}
           <div className="flex gap-4">
+            {/* Bộ lọc */}
             <button className="flex items-center gap-2 rounded-xl border bg-white px-5 py-3 font-medium shadow-sm">
               <Filter size={18} />
               Filters
             </button>
 
+            {/* Export CSV */}
             <button className="flex items-center gap-2 rounded-xl bg-blue-900 px-5 py-3 font-medium text-white shadow-sm">
               <Download size={18} />
               Export CSV
@@ -32,7 +37,7 @@ export default function ParkingSessionsPage() {
           </div>
         </div>
 
-        {/* Statistics */}
+        {/* Thống kê tổng quan */}
         <div className="grid grid-cols-4 gap-6">
           <SessionStatCard title="Active Sessions" value="142" note="↗ 8% from yesterday" />
 
@@ -43,10 +48,10 @@ export default function ParkingSessionsPage() {
           <SessionStatCard title="Average Stay" value="3.2h" note="🕒 Peak 14:00 - 17:00" />
         </div>
 
-        {/* Session Table */}
+        {/* Bảng session */}
         <ParkingSessionTable />
 
-        {/* Bottom Section */}
+        {/* Phân tích AI + biểu đồ doanh thu */}
         <div className="grid grid-cols-2 gap-8">
           <ParkingAiCard />
 

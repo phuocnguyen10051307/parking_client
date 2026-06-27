@@ -1,77 +1,39 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import { toast } from 'sonner';
-
-import { slotsApi } from '@/features/slots/api/slots-api';
-
-type Slot = {
-  id: string;
-  slotCode: string;
-  vehicleType: string;
-  status: string;
-};
+import { useReservations } from '../hooks/use-reservations';
+import type { Reservation } from '../types/reservation.type';
 
 export default function MyReservationsPage() {
-  // State lưu slot available
-  const [slots, setSlots] = useState<Slot[]>([]);
+  // Hook lấy reservation của user hiện tại
+  const { reservations, loading } = useReservations();
 
-  // Fetch slot available
-  useEffect(() => {
-    const fetchSlots = async () => {
-      try {
-        const data = await slotsApi.getAvailableSlots();
-
-        setSlots(data);
-      } catch (error: unknown) {
-        if (axios.isAxiosError(error)) {
-          toast.error(error.response?.data?.message || 'Failed to fetch slots');
-        }
-      }
-    };
-
-    fetchSlots();
-  }, []);
-
-  // Fake reserve tạm thời
-  const handleReserve = (slotCode: string) => {
-    toast.success(`Slot ${slotCode} selected. Reservation API coming soon.`);
-  };
+  // Loading state
+  if (loading) {
+    return <p>Loading reservations...</p>;
+  }
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-blue-900">Reserve Parking Slot</h1>
+        <h1 className="text-3xl font-bold text-blue-900">My Reservations</h1>
 
-        <p className="mt-2 text-slate-500">Choose an available parking slot.</p>
+        <p className="mt-2 text-slate-500">Danh sách reservation của bạn.</p>
       </div>
 
-      {/* Slot list */}
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {slots.map((slot) => (
-          <div key={slot.id} className="rounded-2xl border bg-white p-5 shadow-sm">
-            <p className="text-lg font-semibold">{slot.slotCode}</p>
+      {/* Danh sách reservation */}
+      <div className="space-y-4">
+        {reservations.map((reservation: Reservation) => (
+          <div key={reservation.id} className="rounded-2xl border bg-white p-5 shadow-sm">
+            {/* Slot đã đặt */}
+            <p className="font-semibold">Slot: {reservation.slot?.slotCode}</p>
 
-            <p className="mt-2 text-sm text-slate-500">Vehicle Type: {slot.vehicleType}</p>
+            {/* Xe đã dùng để reserve */}
+            <p>Vehicle: {reservation.vehicle?.licensePlate}</p>
 
-            <p className="mt-1 text-sm text-green-600">Status: {slot.status}</p>
-
-            <button
-              onClick={() => handleReserve(slot.slotCode)}
-              className="mt-4 rounded-xl bg-blue-900 px-4 py-2 text-white transition hover:bg-blue-800"
-            >
-              Reserve
-            </button>
+            {/* Trạng thái */}
+            <p>Status: {reservation.status}</p>
           </div>
         ))}
       </div>
-
-      {/* Empty */}
-      {slots.length === 0 && (
-        <div className="rounded-2xl border bg-white p-6 text-center text-slate-500">
-          No available slots at the moment.
-        </div>
-      )}
     </div>
   );
 }

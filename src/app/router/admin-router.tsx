@@ -2,7 +2,8 @@ import { Navigate, Route } from 'react-router-dom';
 
 import DashboardPage from '@/features/dashboard/pages/dashboard-page';
 import FloorsPage from '@/features/floors/pages/floors-page';
-import ParkingSessionsPage from '@/features/parking-sessions/pages/parking-sessions-page';
+import ParkingSessionsManagementPage from '@/features/parking-sessions/pages/parking-sessions-management-page';
+import ParkingSessionDetailPage from '@/features/parking-sessions/pages/parking-session-detail-page';
 import PricingPage from '@/features/pricing/pages/pricing-page';
 import ProfilePage from '@/features/profile/pages/profile-page';
 import ReportsPage from '@/features/reports/pages/reports-page';
@@ -10,6 +11,10 @@ import SlotsPage from '@/features/slots/pages/slots-page';
 import VehicleEntryPage from '@/features/vehicle-entry/pages/vehicle-entry-page';
 import VehicleExitPage from '@/features/vehicle-exit/pages/vehicle-exit-page';
 import ZonesPage from '@/features/zones/pages/zones-page';
+import FeedbackManagementPage from '@/features/feedback/pages/feedback-management-page';
+import FeedbackDetailPage from '@/features/feedback/pages/feedback-detail-page';
+import ReservationManagementPage from '@/features/reservations/pages/reservation-management-page';
+import ReservationDetailPage from '@/features/reservations/pages/reservation-detail-page';
 
 import { ProtectedRoute } from '@/app/router/protected-route';
 
@@ -52,7 +57,34 @@ export function AdminRouter() {
         path="/parking-sessions"
         element={
           <ProtectedRoute allowedRoles={getAllowedRoles('/parking-sessions')}>
-            <ParkingSessionsPage />
+            <ParkingSessionsManagementPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/parking-sessions/:id"
+        element={
+          <ProtectedRoute allowedRoles={getAllowedRoles('/parking-sessions')}>
+            <ParkingSessionDetailPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/reservations"
+        element={
+          <ProtectedRoute allowedRoles={getAllowedRoles('/reservations')}>
+            <ReservationManagementPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/reservations/:id"
+        element={
+          <ProtectedRoute allowedRoles={getAllowedRoles('/reservations')}>
+            <ReservationDetailPage />
           </ProtectedRoute>
         }
       />
@@ -107,6 +139,24 @@ export function AdminRouter() {
         element={
           <ProtectedRoute allowedRoles={getAllowedRoles('/reports')}>
             <ReportsPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/feedbacks"
+        element={
+          <ProtectedRoute allowedRoles={getAllowedRoles('/feedbacks')}>
+            <FeedbackManagementPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/feedbacks/:id"
+        element={
+          <ProtectedRoute allowedRoles={getAllowedRoles('/feedbacks')}>
+            <FeedbackDetailPage />
           </ProtectedRoute>
         }
       />

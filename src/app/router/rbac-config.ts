@@ -8,7 +8,7 @@ import {
   LogOut,
   Map,
   ParkingCircle,
-  UserRound,
+  MessageSquare,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -35,6 +35,7 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
   { path: '/vehicle-entry', allowedRoles: ALL_STAFF_ROLES },
   { path: '/vehicle-exit', allowedRoles: ALL_STAFF_ROLES },
   { path: '/parking-sessions', allowedRoles: ALL_STAFF_ROLES },
+  { path: '/parking-sessions/:id', allowedRoles: ALL_STAFF_ROLES },
   { path: '/floors', allowedRoles: MANAGEMENT_ROLES },
   { path: '/zones', allowedRoles: MANAGEMENT_ROLES },
   { path: '/slots', allowedRoles: ALL_STAFF_ROLES },
@@ -42,6 +43,10 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
   { path: '/pricing', allowedRoles: MANAGEMENT_ROLES },
   { path: '/reports', allowedRoles: MANAGEMENT_ROLES },
   { path: '/profile', allowedRoles: ALL_STAFF_ROLES },
+  { path: '/reservations', allowedRoles: ALL_STAFF_ROLES },
+  { path: '/reservations/:id', allowedRoles: ALL_STAFF_ROLES },
+  { path: '/feedbacks', allowedRoles: ALL_STAFF_ROLES },
+  { path: '/feedbacks/:id', allowedRoles: ALL_STAFF_ROLES },
   { path: '/my-profile', allowedRoles: ['USER'] },
   { path: '/my-vehicles', allowedRoles: ['USER'] },
   { path: '/my-reservations', allowedRoles: ['USER'] },
@@ -52,6 +57,12 @@ export const SIDEBAR_MENUS: SidebarMenuItem[] = [
   { label: 'Dashboard', path: '/', icon: LayoutDashboard, allowedRoles: ALL_STAFF_ROLES },
   { label: 'Vehicle Entry', path: '/vehicle-entry', icon: CarFront, allowedRoles: ALL_STAFF_ROLES },
   { label: 'Vehicle Exit', path: '/vehicle-exit', icon: LogOut, allowedRoles: ALL_STAFF_ROLES },
+  {
+    label: 'Reservations',
+    path: '/reservations',
+    icon: Clock3,
+    allowedRoles: ALL_STAFF_ROLES,
+  },
   {
     label: 'Parking Sessions',
     path: '/parking-sessions',
@@ -70,11 +81,10 @@ export const SIDEBAR_MENUS: SidebarMenuItem[] = [
   { label: 'Pricing', path: '/pricing', icon: DollarSign, allowedRoles: MANAGEMENT_ROLES },
   { label: 'Reports', path: '/reports', icon: FileBarChart2, allowedRoles: MANAGEMENT_ROLES },
   {
-    label: 'Profile',
-    path: '/profile',
-    icon: UserRound,
+    label: 'Feedbacks',
+    path: '/feedbacks',
+    icon: MessageSquare,
     allowedRoles: ALL_STAFF_ROLES,
-    activeMatchers: ['/profile', '/my-profile'],
   },
 ];
 
