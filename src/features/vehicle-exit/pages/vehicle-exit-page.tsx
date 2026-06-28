@@ -1,12 +1,15 @@
-// src/features/vehicle-exit/pages/vehicle-exit-page.tsx
+import { DashboardLayout } from '@/app/layouts/dashboard-layout';
 
 import { SearchSessionCard } from '../components/search-session-card';
 import { ParkingSessionDetails } from '../components/parking-session-details';
 import { PaymentSummaryCard } from '../components/payment-summary-card';
 import { TerminalStatusCard } from '../components/terminal-status-card';
-import { DashboardLayout } from '@/app/layouts/dashboard-layout';
+import { useVehicleExit } from '../hooks/use-vehicle-exit';
 
 export default function VehicleExitPage() {
+  const { licensePlate, setLicensePlate, session, handleSearchSession, handleCheckout } =
+    useVehicleExit();
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -18,13 +21,19 @@ export default function VehicleExitPage() {
 
         <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
           <div className="space-y-6">
-            <SearchSessionCard />
+            <SearchSessionCard
+              licensePlate={licensePlate}
+              setLicensePlate={setLicensePlate}
+              onSearch={handleSearchSession}
+            />
 
-            <ParkingSessionDetails />
+            {session && <ParkingSessionDetails session={session} />}
           </div>
 
           <div className="space-y-6">
-            <PaymentSummaryCard />
+            {session && (
+              <PaymentSummaryCard totalFee={session.totalFee} onCheckout={handleCheckout} />
+            )}
 
             <TerminalStatusCard />
           </div>

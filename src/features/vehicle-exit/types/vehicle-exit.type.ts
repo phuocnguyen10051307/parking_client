@@ -1,0 +1,26 @@
+export type ExitVehicle = {
+  id: string;
+  licensePlate: string;
+  vehicleType: string;
+  brand?: string;
+  color?: string;
+};
+
+export type ExitSlot = {
+  id: string;
+  slotCode: string;
+};
+
+export type ExitSession = {
+  id: string;
+  vehicleId: string;
+  slotId: string;
+  entryTime: string;
+  exitTime: string | null;
+  entryGate: string;
+  exitGate: string | null;
+  status: string;
+  totalFee: number | null;
+  vehicle: ExitVehicle;
+  slot: ExitSlot;
+};
