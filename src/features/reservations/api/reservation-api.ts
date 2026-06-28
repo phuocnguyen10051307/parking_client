@@ -8,9 +8,19 @@ export const reservationApi = {
   getById: (id: string) => api.get(`/reservations/${id}`),
 
   // Tạo reservation mới
-  create: (payload: { vehicleId: string; slotId: string; startTime: string; endTime: string }) =>
-    api.post('/reservations', payload),
+  create: async (payload: {
+    vehicleId: string;
+    slotId: string;
+    startTime: string;
+    endTime: string;
+  }) => {
+    const res = await api.post('/reservations', payload);
+    return res.data.data;
+  },
 
   // Huỷ reservation
-  cancel: (id: string) => api.put(`/reservations/${id}/cancel`),
+  cancel: async (id: string) => {
+    const res = await api.put(`/reservations/${id}/cancel`);
+    return res.data.data;
+  },
 };

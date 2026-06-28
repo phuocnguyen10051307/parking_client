@@ -24,5 +24,6 @@ export function useReservationDetail(id: string) {
   return {
     reservation,
     loading,
+    setReservation,
   };
 }

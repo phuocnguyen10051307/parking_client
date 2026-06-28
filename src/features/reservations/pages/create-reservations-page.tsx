@@ -1,77 +1,148 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import { toast } from 'sonner';
-
+import { useNavigate } from 'react-router-dom';
+import { reservationApi } from '../api/reservation-api';
+import { vehiclesApi } from '@/features/vehicles/api/vehicles-api';
 import { slotsApi } from '@/features/slots/api/slots-api';
+
+type Vehicle = {
+  id: string;
+  licensePlate: string;
+};
 
 type Slot = {
   id: string;
   slotCode: string;
-  vehicleType: string;
-  status: string;
 };
 
 export default function CreateReservationPage() {
-  // State lưu slot available
+  const navigate = useNavigate();
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [slots, setSlots] = useState<Slot[]>([]);
 
-  // Fetch slot available
+  const [vehicleId, setVehicleId] = useState('');
+  const [slotId, setSlotId] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+
+  // Load vehicles
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      try {
+        const data = await vehiclesApi.getMyVehicles();
+
+        setVehicles(data);
+      } catch {
+        toast.error('Failed to load vehicles');
+      }
+    };
+
+    fetchVehicles();
+  }, []);
+
+  // Load available slots
   useEffect(() => {
     const fetchSlots = async () => {
       try {
         const data = await slotsApi.getAvailableSlots();
 
         setSlots(data);
-      } catch (error: unknown) {
-        if (axios.isAxiosError(error)) {
-          toast.error(error.response?.data?.message || 'Failed to fetch slots');
-        }
+      } catch {
+        toast.error('Failed to load slots');
       }
     };
 
     fetchSlots();
   }, []);
 
-  // Fake reserve tạm thời
-  const handleReserve = (slotCode: string) => {
-    toast.success(`Slot ${slotCode} selected. Reservation API coming soon.`);
+  // Submit reservation
+  const handleSubmit = async () => {
+    if (!vehicleId || !slotId || !startTime || !endTime) {
+      toast.error('Please fill all fields');
+      return;
+    }
+
+    try {
+      await reservationApi.create({
+        vehicleId,
+        slotId,
+        startTime,
+        endTime,
+      });
+
+      toast.success('Reservation created successfully');
+
+      // chuyển về trang my reservations
+      navigate('/user/my-reservations');
+    } catch {
+      toast.error('Failed to create reservation');
+    }
   };
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-blue-900">Reserve Parking Slot</h1>
-
-        <p className="mt-2 text-slate-500">Choose an available parking slot.</p>
+        <h1 className="text-3xl font-bold text-blue-900">Create Reservation</h1>
+        <p className="mt-2 text-slate-500">Reserve your parking slot in advance</p>
       </div>
 
-      {/* Slot list */}
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {slots.map((slot) => (
-          <div key={slot.id} className="rounded-2xl border bg-white p-5 shadow-sm">
-            <p className="text-lg font-semibold">{slot.slotCode}</p>
+      {/* Form */}
+      <div className="space-y-4 rounded-2xl border bg-white p-6 shadow-sm">
+        {/* Vehicle */}
+        <select
+          value={vehicleId}
+          onChange={(e) => setVehicleId(e.target.value)}
+          className="w-full rounded-xl border p-3"
+        >
+          <option value="">Select vehicle</option>
 
-            <p className="mt-2 text-sm text-slate-500">Vehicle Type: {slot.vehicleType}</p>
+          {vehicles.map((vehicle) => (
+            <option key={vehicle.id} value={vehicle.id}>
+              {vehicle.licensePlate}
+            </option>
+          ))}
+        </select>
 
-            <p className="mt-1 text-sm text-green-600">Status: {slot.status}</p>
+        {/* Slot */}
+        <select
+          value={slotId}
+          onChange={(e) => setSlotId(e.target.value)}
+          className="w-full rounded-xl border p-3"
+        >
+          <option value="">Select slot</option>
 
-            <button
-              onClick={() => handleReserve(slot.slotCode)}
-              className="mt-4 rounded-xl bg-blue-900 px-4 py-2 text-white transition hover:bg-blue-800"
-            >
-              Reserve
-            </button>
-          </div>
-        ))}
+          {slots.map((slot) => (
+            <option key={slot.id} value={slot.id}>
+              {slot.slotCode}
+            </option>
+          ))}
+        </select>
+
+        {/* Start time */}
+        <input
+          type="datetime-local"
+          value={startTime}
+          onChange={(e) => setStartTime(e.target.value)}
+          className="w-full rounded-xl border p-3"
+        />
+
+        {/* End time */}
+        <input
+          type="datetime-local"
+          value={endTime}
+          onChange={(e) => setEndTime(e.target.value)}
+          className="w-full rounded-xl border p-3"
+        />
+
+        {/* Submit */}
+        <button
+          onClick={handleSubmit}
+          className="rounded-xl bg-blue-900 px-5 py-3 font-medium text-white"
+        >
+          Create Reservation
+        </button>
       </div>
-
-      {/* Empty */}
-      {slots.length === 0 && (
-        <div className="rounded-2xl border bg-white p-6 text-center text-slate-500">
-          No available slots at the moment.
-        </div>
-      )}
     </div>
   );
 }

@@ -1,13 +1,17 @@
 import { CalendarDays, CarFront, Clock3, MapPin, UserRound } from 'lucide-react';
 import { useParams } from 'react-router-dom';
+import { toast } from 'sonner';
 
 import { DashboardLayout } from '@/app/layouts/dashboard-layout';
 
+import { reservationApi } from '../api/reservation-api';
 import { useReservationDetail } from '../hooks/use-reservation-detail';
 
 export default function ReservationDetailPage() {
   const { id = '' } = useParams();
-  const { reservation, loading } = useReservationDetail(id);
+
+  // Hook lấy chi tiết reservation
+  const { reservation, loading, setReservation } = useReservationDetail(id);
 
   // Badge màu theo status
   const getStatusColor = (status: string) => {
@@ -23,6 +27,27 @@ export default function ReservationDetailPage() {
       default:
         return 'bg-blue-100 text-blue-700';
     }
+  };
+
+  // Cancel reservation
+  const handleCancelReservation = () => {
+    toast('Are you sure to cancel this reservation?', {
+      action: {
+        label: 'Confirm',
+        onClick: async () => {
+          try {
+            const updated = await reservationApi.cancel(id);
+
+            // update local state
+            setReservation(updated);
+
+            toast.success('Reservation cancelled successfully');
+          } catch {
+            toast.error('Failed to cancel reservation');
+          }
+        },
+      },
+    });
   };
 
   if (loading) {
@@ -54,6 +79,7 @@ export default function ReservationDetailPage() {
             </p>
           </div>
 
+          {/* Badge status */}
           <span
             className={`rounded-full px-4 py-2 text-sm font-semibold ${getStatusColor(
               reservation.status
@@ -63,7 +89,7 @@ export default function ReservationDetailPage() {
           </span>
         </div>
 
-        {/* Top summary */}
+        {/* Summary */}
         <div className="grid grid-cols-3 gap-6">
           <SummaryCard
             icon={<Clock3 size={18} />}
@@ -86,14 +112,12 @@ export default function ReservationDetailPage() {
 
         {/* Main info */}
         <div className="grid grid-cols-2 gap-8">
-          {/* Customer */}
           <InfoCard title="Customer Information" icon={<UserRound size={18} />}>
             <InfoRow label="Full Name" value={reservation.user?.fullName} />
             <InfoRow label="Email" value={reservation.user?.email} />
             <InfoRow label="Phone" value={reservation.user?.phone} />
           </InfoCard>
 
-          {/* Vehicle */}
           <InfoCard title="Vehicle Information" icon={<CarFront size={18} />}>
             <InfoRow label="License Plate" value={reservation.vehicle?.licensePlate} />
             <InfoRow label="Vehicle Type" value={reservation.vehicle?.vehicleType} />
@@ -101,18 +125,28 @@ export default function ReservationDetailPage() {
             <InfoRow label="Color" value={reservation.vehicle?.color} />
           </InfoCard>
 
-          {/* Slot */}
           <InfoCard title="Slot Information" icon={<MapPin size={18} />}>
             <InfoRow label="Slot Code" value={reservation.slot?.slotCode} />
             <InfoRow label="Zone" value={reservation.slot?.zone?.name} />
             <InfoRow label="Slot Status" value={reservation.slot?.status} />
           </InfoCard>
 
-          {/* Reservation meta */}
           <InfoCard title="Reservation Metadata" icon={<CalendarDays size={18} />}>
             <InfoRow label="Reservation ID" value={reservation.id} />
             <InfoRow label="Status" value={reservation.status} />
           </InfoCard>
+        </div>
+
+        {/* Action buttons */}
+        <div className="flex gap-4">
+          {reservation.status !== 'CANCELLED' && (
+            <button
+              onClick={handleCancelReservation}
+              className="rounded-xl bg-red-600 px-5 py-3 font-medium text-white"
+            >
+              Cancel Reservation
+            </button>
+          )}
         </div>
       </div>
     </DashboardLayout>
@@ -141,7 +175,7 @@ function SummaryCard({
   );
 }
 
-/* Info card */
+/* Card thông tin */
 function InfoCard({
   title,
   icon,
@@ -163,7 +197,7 @@ function InfoCard({
   );
 }
 
-/* Info row */
+/* Row hiển thị label + value */
 function InfoRow({ label, value }: { label: string; value?: string }) {
   return (
     <div className="flex items-center justify-between border-b pb-3">

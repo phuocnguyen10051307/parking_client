@@ -7,9 +7,11 @@ import type { Feedback } from '../types/feedback.type';
 type Props = {
   feedback: Feedback;
   onUpdated?: (updated: Feedback) => void;
+  isStaff?: boolean;
 };
 
-export function FeedbackCard({ feedback, onUpdated }: Props) {
+export function FeedbackCard({ feedback, onUpdated, isStaff = false }: Props) {
+  // Badge màu theo status
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'OPEN':
@@ -23,8 +25,9 @@ export function FeedbackCard({ feedback, onUpdated }: Props) {
     }
   };
 
+  // Update status (chỉ staff dùng)
   const handleUpdateStatus = async (e: React.MouseEvent<HTMLButtonElement>, status: string) => {
-    e.preventDefault(); // chặn Link redirect
+    e.preventDefault();
 
     try {
       const updatedFeedback = await feedbackApi.update(feedback.id, { status });
@@ -35,41 +38,42 @@ export function FeedbackCard({ feedback, onUpdated }: Props) {
     }
   };
 
-  return (
-    <Link to={`/feedbacks/${feedback.id}`}>
-      <div className="mb-2 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
-        {/* Header */}
-        <div className="mb-4 flex items-start justify-between">
-          <div>
-            <h3 className="text-lg font-semibold text-slate-800">{feedback.title}</h3>
+  // UI card dùng chung
+  const CardContent = (
+    <div className="mb-2 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
+      {/* Header */}
+      <div className="mb-4 flex items-start justify-between">
+        <div>
+          <h3 className="text-lg font-semibold text-slate-800">{feedback.title}</h3>
 
-            {/* User */}
-            <div className="mt-2 flex items-center gap-2 text-sm text-slate-500">
-              <UserRound size={14} />
-              <span>{feedback.user?.fullName}</span>
-            </div>
-
-            {/* Created time */}
-            <div className="mt-1 flex items-center gap-2 text-sm text-slate-400">
-              <CalendarDays size={14} />
-              <span>{new Date(feedback.createdAt).toLocaleString()}</span>
-            </div>
+          {/* User */}
+          <div className="mt-2 flex items-center gap-2 text-sm text-slate-500">
+            <UserRound size={14} />
+            <span>{feedback.user?.fullName}</span>
           </div>
 
-          {/* Status badge */}
-          <span
-            className={`rounded-full px-3 py-1 text-xs font-semibold ${getStatusColor(
-              feedback.status
-            )}`}
-          >
-            {feedback.status}
-          </span>
+          {/* Created time */}
+          <div className="mt-1 flex items-center gap-2 text-sm text-slate-400">
+            <CalendarDays size={14} />
+            <span>{new Date(feedback.createdAt).toLocaleString()}</span>
+          </div>
         </div>
 
-        {/* Content preview */}
-        <p className="line-clamp-2 text-sm text-slate-600">{feedback.content}</p>
+        {/* Status */}
+        <span
+          className={`rounded-full px-3 py-1 text-xs font-semibold ${getStatusColor(
+            feedback.status
+          )}`}
+        >
+          {feedback.status}
+        </span>
+      </div>
 
-        {/* Footer actions */}
+      {/* Content */}
+      <p className="line-clamp-2 text-sm text-slate-600">{feedback.content}</p>
+
+      {/* Staff actions */}
+      {isStaff && (
         <div className="mt-4 flex items-center justify-end gap-3">
           {feedback.status !== 'IN_PROGRESS' && (
             <button
@@ -89,7 +93,15 @@ export function FeedbackCard({ feedback, onUpdated }: Props) {
             </button>
           )}
         </div>
-      </div>
-    </Link>
+      )}
+    </div>
   );
+
+  // Staff click được -> vào detail
+  if (isStaff) {
+    return <Link to={`/feedbacks/${feedback.id}`}>{CardContent}</Link>;
+  }
+
+  // User chỉ xem list, không click
+  return CardContent;
 }

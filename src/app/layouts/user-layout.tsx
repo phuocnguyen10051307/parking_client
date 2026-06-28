@@ -58,10 +58,17 @@ export function UserLayout() {
           </Link>
 
           <Link
-            to="/user/my-history"
+            to="/user/my-sessions"
             className="font-medium text-slate-700 transition hover:text-blue-900"
           >
-            History
+            Parking Sessions
+          </Link>
+
+          <Link
+            to="/user/my-feedbacks"
+            className="font-medium text-slate-700 transition hover:text-blue-900"
+          >
+            Feedbacks
           </Link>
 
           <div className="flex flex-col text-right">

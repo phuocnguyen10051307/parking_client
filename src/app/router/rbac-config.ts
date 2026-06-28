@@ -50,7 +50,10 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
   { path: '/my-profile', allowedRoles: ['USER'] },
   { path: '/my-vehicles', allowedRoles: ['USER'] },
   { path: '/my-reservations', allowedRoles: ['USER'] },
-  { path: '/my-history', allowedRoles: ['USER'] },
+  { path: '/my-reservations/:id', allowedRoles: ['USER'] },
+  { path: '/my-sessions', allowedRoles: ['USER'] },
+  { path: '/my-feedbacks', allowedRoles: ['USER'] },
+  { path: '/create-feedback', allowedRoles: ['USER'] },
 ];
 
 export const SIDEBAR_MENUS: SidebarMenuItem[] = [

@@ -27,5 +27,6 @@ export function useReservations() {
   return {
     reservations,
     loading,
+    setReservations,
   };
 }

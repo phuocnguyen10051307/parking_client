@@ -49,6 +49,7 @@ export default function FeedbackManagementPage() {
               <FeedbackCard
                 key={feedback.id}
                 feedback={feedback}
+                isStaff={true}
                 onUpdated={(updated) =>
                   setFeedbacks((prev) =>
                     prev.map((item) => (item.id === updated.id ? updated : item))
