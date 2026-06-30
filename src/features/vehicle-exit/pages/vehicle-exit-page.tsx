@@ -7,8 +7,16 @@ import { TerminalStatusCard } from '../components/terminal-status-card';
 import { useVehicleExit } from '../hooks/use-vehicle-exit';
 
 export default function VehicleExitPage() {
-  const { licensePlate, setLicensePlate, session, handleSearchSession, handleCheckout } =
-    useVehicleExit();
+  const {
+    licensePlate,
+    setLicensePlate,
+    session,
+    setExitImage,
+    isCheckingOut,
+    handlePlateDetected,
+    handleSearchSession,
+    handleCheckout,
+  } = useVehicleExit();
 
   return (
     <DashboardLayout>
@@ -24,6 +32,8 @@ export default function VehicleExitPage() {
             <SearchSessionCard
               licensePlate={licensePlate}
               setLicensePlate={setLicensePlate}
+              onImageCaptured={setExitImage}
+              onPlateDetected={handlePlateDetected}
               onSearch={handleSearchSession}
             />
 
@@ -32,7 +42,13 @@ export default function VehicleExitPage() {
 
           <div className="space-y-6">
             {session && (
-              <PaymentSummaryCard totalFee={session.totalFee} onCheckout={handleCheckout} />
+              <PaymentSummaryCard
+                entryTime={session.entryTime}
+                totalFee={session.totalFee}
+                vehicleType={session.vehicle.vehicleType}
+                isCheckingOut={isCheckingOut}
+                onCheckout={handleCheckout}
+              />
             )}
 
             <TerminalStatusCard />
@@ -42,3 +58,4 @@ export default function VehicleExitPage() {
     </DashboardLayout>
   );
 }
+

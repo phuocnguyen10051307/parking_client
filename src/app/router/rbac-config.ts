@@ -27,26 +27,27 @@ export type SidebarMenuItem = {
   path: string;
 };
 
-const ALL_STAFF_ROLES: UserRole[] = ['ADMIN', 'MANAGER', 'STAFF'];
+const OPERATION_ROLES: UserRole[] = ['ADMIN', 'MANAGER', 'STAFF'];
 const MANAGEMENT_ROLES: UserRole[] = ['ADMIN', 'MANAGER'];
+const STAFF_ROLES: UserRole[] = ['STAFF'];
 
 export const ROUTE_PERMISSIONS: RoutePermission[] = [
-  { path: '/', allowedRoles: ALL_STAFF_ROLES },
-  { path: '/vehicle-entry', allowedRoles: ALL_STAFF_ROLES },
-  { path: '/vehicle-exit', allowedRoles: ALL_STAFF_ROLES },
-  { path: '/parking-sessions', allowedRoles: ALL_STAFF_ROLES },
-  { path: '/parking-sessions/:id', allowedRoles: ALL_STAFF_ROLES },
+  { path: '/', allowedRoles: OPERATION_ROLES },
+  { path: '/vehicle-entry', allowedRoles: STAFF_ROLES },
+  { path: '/vehicle-exit', allowedRoles: STAFF_ROLES },
+  { path: '/parking-sessions', allowedRoles: OPERATION_ROLES },
+  { path: '/parking-sessions/:id', allowedRoles: OPERATION_ROLES },
   { path: '/floors', allowedRoles: MANAGEMENT_ROLES },
   { path: '/zones', allowedRoles: MANAGEMENT_ROLES },
-  { path: '/slots', allowedRoles: ALL_STAFF_ROLES },
-  { path: '/slots/:floorId', allowedRoles: ALL_STAFF_ROLES },
+  { path: '/slots', allowedRoles: OPERATION_ROLES },
+  { path: '/slots/:floorId', allowedRoles: OPERATION_ROLES },
   { path: '/pricing', allowedRoles: MANAGEMENT_ROLES },
   { path: '/reports', allowedRoles: MANAGEMENT_ROLES },
-  { path: '/profile', allowedRoles: ALL_STAFF_ROLES },
-  { path: '/reservations', allowedRoles: ALL_STAFF_ROLES },
-  { path: '/reservations/:id', allowedRoles: ALL_STAFF_ROLES },
-  { path: '/feedbacks', allowedRoles: ALL_STAFF_ROLES },
-  { path: '/feedbacks/:id', allowedRoles: ALL_STAFF_ROLES },
+  { path: '/profile', allowedRoles: OPERATION_ROLES },
+  { path: '/reservations', allowedRoles: OPERATION_ROLES },
+  { path: '/reservations/:id', allowedRoles: OPERATION_ROLES },
+  { path: '/feedbacks', allowedRoles: OPERATION_ROLES },
+  { path: '/feedbacks/:id', allowedRoles: OPERATION_ROLES },
   { path: '/my-profile', allowedRoles: ['USER'] },
   { path: '/my-vehicles', allowedRoles: ['USER'] },
   { path: '/my-reservations', allowedRoles: ['USER'] },
@@ -57,20 +58,20 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
 ];
 
 export const SIDEBAR_MENUS: SidebarMenuItem[] = [
-  { label: 'Dashboard', path: '/', icon: LayoutDashboard, allowedRoles: ALL_STAFF_ROLES },
-  { label: 'Vehicle Entry', path: '/vehicle-entry', icon: CarFront, allowedRoles: ALL_STAFF_ROLES },
-  { label: 'Vehicle Exit', path: '/vehicle-exit', icon: LogOut, allowedRoles: ALL_STAFF_ROLES },
+  { label: 'Dashboard', path: '/', icon: LayoutDashboard, allowedRoles: OPERATION_ROLES },
+  { label: 'Vehicle Entry', path: '/vehicle-entry', icon: CarFront, allowedRoles: STAFF_ROLES },
+  { label: 'Vehicle Exit', path: '/vehicle-exit', icon: LogOut, allowedRoles: STAFF_ROLES },
   {
     label: 'Reservations',
     path: '/reservations',
     icon: Clock3,
-    allowedRoles: ALL_STAFF_ROLES,
+    allowedRoles: OPERATION_ROLES,
   },
   {
     label: 'Parking Sessions',
     path: '/parking-sessions',
     icon: Clock3,
-    allowedRoles: ALL_STAFF_ROLES,
+    allowedRoles: OPERATION_ROLES,
   },
   { label: 'Floors', path: '/floors', icon: Building2, allowedRoles: MANAGEMENT_ROLES },
   { label: 'Zones', path: '/zones', icon: Map, allowedRoles: MANAGEMENT_ROLES },
@@ -78,7 +79,7 @@ export const SIDEBAR_MENUS: SidebarMenuItem[] = [
     label: 'Slots',
     path: '/slots/basement-1',
     icon: ParkingCircle,
-    allowedRoles: ALL_STAFF_ROLES,
+    allowedRoles: OPERATION_ROLES,
     activeMatchers: ['/slots'],
   },
   { label: 'Pricing', path: '/pricing', icon: DollarSign, allowedRoles: MANAGEMENT_ROLES },
@@ -87,7 +88,7 @@ export const SIDEBAR_MENUS: SidebarMenuItem[] = [
     label: 'Feedbacks',
     path: '/feedbacks',
     icon: MessageSquare,
-    allowedRoles: ALL_STAFF_ROLES,
+    allowedRoles: OPERATION_ROLES,
   },
 ];
 
@@ -96,7 +97,7 @@ export function normalizeRole(role?: string | null): UserRole | null {
     return null;
   }
 
-  const normalizedRole = role.toUpperCase();
+  const normalizedRole = role.trim().toUpperCase();
 
   if (
     normalizedRole === 'ADMIN' ||

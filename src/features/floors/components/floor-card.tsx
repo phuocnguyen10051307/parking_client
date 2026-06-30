@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { Pencil, Trash2 } from 'lucide-react';
 
 import type { Floor } from '../types/floor';
 
@@ -8,35 +7,18 @@ type Props = {
 };
 
 export function FloorCard({ floor }: Props) {
-  // Tính phần trăm đã sử dụng
-  const occupiedPercent = Math.round((floor.occupiedSlots / floor.totalSlots) * 100);
-
-  // Tính số slot còn trống
-  const availableSlots = floor.totalSlots - floor.occupiedSlots;
+  const occupiedPercent = floor.totalSlots > 0 ? Math.round((floor.occupiedSlots / floor.totalSlots) * 100) : 0;
+  const availableSlots = Math.max(floor.totalSlots - floor.occupiedSlots, 0);
 
   return (
     <div className="rounded-3xl border bg-white p-6 shadow-sm">
-      {/* Header */}
       <div className="mb-6 flex items-start justify-between">
         <div>
           <h3 className="text-xl font-semibold text-blue-900">{floor.name}</h3>
-
           <p className="text-sm text-slate-500">{floor.description}</p>
-        </div>
-
-        {/* Nút chỉnh sửa / xoá */}
-        <div className="flex gap-2">
-          <button>
-            <Pencil size={18} />
-          </button>
-
-          <button>
-            <Trash2 size={18} className="text-red-500" />
-          </button>
         </div>
       </div>
 
-      {/* Thống kê */}
       <div className="space-y-3">
         <div className="flex justify-between">
           <span>Total Slots</span>
@@ -59,21 +41,14 @@ export function FloorCard({ floor }: Props) {
         </div>
       </div>
 
-      {/* Progress bar */}
       <div className="mt-5">
         <div className="h-3 overflow-hidden rounded-full bg-slate-200">
-          <div
-            className="h-full rounded-full bg-blue-900"
-            style={{
-              width: `${occupiedPercent}%`,
-            }}
-          />
+          <div className="h-full rounded-full bg-blue-900" style={{ width: `${occupiedPercent}%` }} />
         </div>
 
         <p className="mt-2 text-sm text-slate-500">Occupancy {occupiedPercent}%</p>
       </div>
 
-      {/* Footer */}
       <div className="mt-5 flex items-center justify-between border-t pt-4">
         <span
           className={`rounded-full px-3 py-1 text-xs font-medium ${
@@ -87,7 +62,6 @@ export function FloorCard({ floor }: Props) {
           {floor.status}
         </span>
 
-        {/* Route động theo floor.id */}
         <Link to={`/slots/${floor.id}`} className="font-medium text-blue-900 hover:underline">
           View Slots
         </Link>

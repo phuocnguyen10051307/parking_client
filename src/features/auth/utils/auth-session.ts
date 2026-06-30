@@ -1,27 +1,18 @@
-import { useAuthStore } from '@/store/auth-store';
+﻿import { useAuthStore } from '@/store/auth-store';
 
 import type { User } from '@/types/user';
-
-// Lấy access token từ Zustand persist
-export function getStoredAccessToken() {
-  return useAuthStore.getState().accessToken;
-}
 
 // Lấy user từ Zustand persist
 export function getStoredUser() {
   return useAuthStore.getState().user;
 }
 
-// Lưu session vào Zustand
-// Zustand persist sẽ tự sync xuống localStorage (key: parking-auth)
-export function persistAuthSession(accessToken: string, user: User) {
-  const { setAccessToken, setUser } = useAuthStore.getState();
-
-  setAccessToken(accessToken);
-  setUser(user);
+// Lưu user vào Zustand. Token được giữ trong HTTP-only cookie.
+export function persistAuthSession(user: User) {
+  useAuthStore.getState().setUser(user);
 }
 
-// Xóa session
+// Xóa session phía client. Cookie sẽ được backend clear khi gọi signout.
 export function clearAuthSession() {
   useAuthStore.getState().clearState();
 }

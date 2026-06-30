@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react';
 
+import type { User } from '@/types/user';
+
 import { authApi } from '../api/auth-api';
 
 export function useAuth() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Load user hiện tại
   useEffect(() => {
     const fetchMe = async () => {
       try {
-        const res = await authApi.me();
-
-        setUser(res.user);
+        const currentUser = await authApi.me();
+        setUser(currentUser);
       } catch {
         setUser(null);
       } finally {

@@ -1,21 +1,10 @@
-import axios from 'axios';
+﻿import axios from 'axios';
 
-import { clearAuthSession, getStoredAccessToken } from '@/features/auth/utils/auth-session';
-import { useAuthStore } from '@/store/auth-store';
+import { clearAuthSession } from '@/features/auth/utils/auth-session';
 
 const api = axios.create({
   baseURL: import.meta.env.MODE === 'development' ? 'http://localhost:3000/v1' : '/v1',
   withCredentials: true,
-});
-
-api.interceptors.request.use((config) => {
-  const token = getStoredAccessToken();
-
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-
-  return config;
 });
 
 api.interceptors.response.use(
@@ -32,15 +21,7 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const res = await api.post('/auth/refresh-token');
-        const newAccessToken = res.data.accessToken;
-
-        if (newAccessToken) {
-          localStorage.setItem('accessToken', newAccessToken);
-          useAuthStore.getState().setAccessToken(newAccessToken);
-        }
-
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        await api.post('/auth/refresh-token');
         return api(originalRequest);
       } catch {
         clearAuthSession();
