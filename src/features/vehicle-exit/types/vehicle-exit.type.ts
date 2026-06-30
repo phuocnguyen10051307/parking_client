@@ -19,6 +19,8 @@ export type ExitSession = {
   exitTime: string | null;
   entryGate: string;
   exitGate: string | null;
+  exitImageUrl?: string | null;
+  exitImagePublicId?: string | null;
   status: string;
   totalFee: number | null;
   vehicle: ExitVehicle;

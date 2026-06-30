@@ -100,9 +100,18 @@ export default function ParkingSessionDetailPage() {
             <InfoRow label="Color" value={session.vehicle?.color} />
           </InfoCard>
 
-          <InfoCard title="Parking Slot" icon={<MapPin size={18} />}>
+          <InfoCard title="Parking Position" icon={<MapPin size={18} />}>
             <InfoRow label="Slot Code" value={session.slot?.slotCode} />
-            <InfoRow label="Vehicle Type" value={session.slot?.vehicleType} />
+            <InfoRow label="Zone" value={session.slot?.zone?.name} />
+            <InfoRow
+              label="Floor"
+              value={
+                typeof session.slot?.zone?.floor?.floorNumber === 'number'
+                  ? String(session.slot.zone.floor.floorNumber)
+                  : undefined
+              }
+            />
+            <InfoRow label="Building" value={session.slot?.zone?.floor?.building?.name} />
             <InfoRow label="Slot Status" value={session.slot?.status} />
           </InfoCard>
 
@@ -118,6 +127,33 @@ export default function ParkingSessionDetailPage() {
           </InfoCard>
         </div>
 
+        {(session.entryImageUrl || session.exitImageUrl) && (
+          <div className="rounded-3xl border bg-white p-6 shadow-sm">
+            <h2 className="mb-4 text-lg font-semibold text-blue-900">Vehicle Photos</h2>
+            <div className="grid gap-6 md:grid-cols-2">
+              {session.entryImageUrl && (
+                <div>
+                  <div className="mb-2 text-sm font-medium text-slate-600">Check-in photo</div>
+                  <img
+                    src={session.entryImageUrl}
+                    alt="Vehicle check-in"
+                    className="aspect-video w-full rounded-xl object-cover"
+                  />
+                </div>
+              )}
+              {session.exitImageUrl && (
+                <div>
+                  <div className="mb-2 text-sm font-medium text-slate-600">Check-out photo</div>
+                  <img
+                    src={session.exitImageUrl}
+                    alt="Vehicle check-out"
+                    className="aspect-video w-full rounded-xl object-cover"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         {/* Note */}
         {session.note && (
           <div className="rounded-3xl border bg-white p-6 shadow-sm">

@@ -5,7 +5,11 @@ export type ParkingSession = {
   entryTime: string;
   exitTime?: string | null;
   entryGate?: string | null;
+  entryImageUrl?: string | null;
+  entryImagePublicId?: string | null;
   exitGate?: string | null;
+  exitImageUrl?: string | null;
+  exitImagePublicId?: string | null;
   status: SessionStatus;
   totalFee?: string | null;
   note?: string | null;
@@ -24,6 +28,19 @@ export type ParkingSession = {
     slotCode: string;
     vehicleType: string;
     status: string;
+    zone?: {
+      id: string;
+      name: string;
+      floor?: {
+        id: string;
+        floorNumber: number;
+        building?: {
+          id: string;
+          name: string;
+          address?: string;
+        };
+      };
+    };
   };
 
   user?: {

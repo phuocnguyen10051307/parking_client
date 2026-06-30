@@ -1,8 +1,7 @@
 import api from '@/lib/api';
 
 export const parkingSessionApi = {
-  // Lấy toàn bộ parking session
-  getAll: () => api.get('/parking-sessions'),
+  getAll: (params?: { status?: string }) => api.get('/parking-sessions', { params }),
 
   // Lấy session của user hiện tại
   getMine: async () => {

@@ -1,35 +1,41 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { parkingSessionApi } from '../api/parking-session-api';
-import type { ParkingSession } from '../types/session.type';
+import type { ParkingSession, SessionStatus } from '../types/session.type';
 
-export function useParkingSessions() {
-  // State lưu danh sách sessions
+type UseParkingSessionsOptions = {
+  status?: SessionStatus;
+};
+
+export function useParkingSessions(options: UseParkingSessionsOptions = {}) {
   const [sessions, setSessions] = useState<ParkingSession[]>([]);
-
-  // State loading
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Fetch dữ liệu từ backend
+  const fetchSessions = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const res = await parkingSessionApi.getAll({ status: options.status });
+
+      setSessions(res.data.data || []);
+    } catch {
+      setSessions([]);
+      setError('Could not load parking sessions. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, [options.status]);
+
   useEffect(() => {
-    const fetchSessions = async () => {
-      try {
-        const res = await parkingSessionApi.getAll();
-
-        // Backend trả về { success, data }
-        setSessions(res.data.data || []);
-      } catch {
-        setSessions([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchSessions();
-  }, []);
+  }, [fetchSessions]);
 
   return {
     sessions,
     loading,
+    error,
+    refetch: fetchSessions,
   };
 }

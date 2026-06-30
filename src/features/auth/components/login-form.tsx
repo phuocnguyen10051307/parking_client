@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -66,15 +66,11 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
     try {
       setLoading(true);
 
-      const res = await authApi.signin(form);
-      const { accessToken, user } = res.data;
+      const { user } = await authApi.signin(form);
 
-      console.log('[LoginForm] Signin success', { role: user.role, email: user.email });
-      persistAuthSession(accessToken, user);
+      persistAuthSession(user);
       toast.success('Login successfully');
-      const targetRoute = getDefaultRouteByRole(user.role);
-      console.log('[LoginForm] Navigating to', { targetRoute });
-      navigate(targetRoute);
+      navigate(getDefaultRouteByRole(user.role), { replace: true });
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         const message = error.response?.data?.message;
@@ -149,3 +145,5 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
     </div>
   );
 }
+
+

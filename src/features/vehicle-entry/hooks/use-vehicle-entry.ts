@@ -1,32 +1,42 @@
+import axios from 'axios';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { vehicleEntryApi } from '../api/vehicle-entry-api';
 import type { EntrySlot, EntryVehicle } from '../types/vehicle-entry.type';
 
+const DEFAULT_VEHICLE_TYPE = 'CAR';
+const DEFAULT_ENTRY_GATE = 'B1';
+
+const normalizePlate = (plate: string) =>
+  plate
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '');
+
 export function useVehicleEntry() {
-  // Form state
   const [licensePlate, setLicensePlate] = useState('');
-  const [vehicleType, setVehicleType] = useState('CAR');
-  const [entryGate, setEntryGate] = useState('North Main Entrance');
+  const [vehicleType] = useState(DEFAULT_VEHICLE_TYPE);
+  const [entryGate] = useState(DEFAULT_ENTRY_GATE);
+  const [entryImage, setEntryImage] = useState<File | null>(null);
+  const [isCheckingIn, setIsCheckingIn] = useState(false);
 
-  // Vehicle state
   const [vehicle, setVehicle] = useState<EntryVehicle | null>(null);
-
-  // Slot state
   const [slots, setSlots] = useState<EntrySlot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<EntrySlot | null>(null);
 
-  // Search vehicle by plate
   const handleSearchVehicle = async () => {
-    try {
-      const vehicles = await vehicleEntryApi.findVehicleByPlate(licensePlate);
+    const plate = normalizePlate(licensePlate);
 
-      const matchedVehicle = vehicles.find(
-        (v) =>
-          v.licensePlate.replace(/[-.\s]/g, '').toUpperCase() ===
-          licensePlate.replace(/[-.\s]/g, '').toUpperCase()
-      );
+    if (!plate) {
+      toast.warning('License plate is required');
+      return;
+    }
+
+    try {
+      const vehicles = await vehicleEntryApi.findVehicleByPlate(plate);
+
+      const matchedVehicle = vehicles.find((v) => normalizePlate(v.licensePlate) === plate);
 
       if (matchedVehicle) {
         setVehicle(matchedVehicle);
@@ -40,7 +50,6 @@ export function useVehicleEntry() {
     }
   };
 
-  // Load available slots
   const loadAvailableSlots = async () => {
     try {
       const data = await vehicleEntryApi.getAvailableSlots(vehicleType);
@@ -51,6 +60,7 @@ export function useVehicleEntry() {
         setSelectedSlot(data[0]);
         toast.success('Available slots loaded');
       } else {
+        setSelectedSlot(null);
         toast.warning('No available slots found');
       }
     } catch {
@@ -58,10 +68,24 @@ export function useVehicleEntry() {
     }
   };
 
-  // Check-in vehicle
+  const handleImageCaptured = async (file: File | null) => {
+    setEntryImage(file);
+
+    if (file) {
+      await loadAvailableSlots();
+    }
+  };
+
   const handleCheckIn = async () => {
-    if (!vehicle) {
-      toast.error('Vehicle is required');
+    const plate = normalizePlate(licensePlate);
+
+    if (!plate) {
+      toast.error('License plate is required');
+      return;
+    }
+
+    if (!entryImage) {
+      toast.error('Captured image is required');
       return;
     }
 
@@ -70,25 +94,33 @@ export function useVehicleEntry() {
       return;
     }
 
+    setIsCheckingIn(true);
+
     try {
-      await vehicleEntryApi.checkIn({
-        vehicleId: vehicle.id,
+      await vehicleEntryApi.checkInByPlate({
+        plate,
+        image: entryImage,
         slotId: selectedSlot.id,
+        vehicleType,
         entryGate,
       });
 
-      toast.success('Parking session created successfully');
+      toast.success('Parking session checked in successfully');
 
-      //load lại slot mới
-      await loadAvailableSlots();
-
-      // reset UI sau check-in
       setLicensePlate('');
       setVehicle(null);
+      setEntryImage(null);
       setSlots([]);
       setSelectedSlot(null);
-    } catch {
-      toast.error('Failed to create parking session');
+      await loadAvailableSlots();
+    } catch (error) {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message || 'Failed to check in vehicle'
+        : 'Failed to check in vehicle';
+
+      toast.error(message);
+    } finally {
+      setIsCheckingIn(false);
     }
   };
 
@@ -96,9 +128,10 @@ export function useVehicleEntry() {
     licensePlate,
     setLicensePlate,
     vehicleType,
-    setVehicleType,
     entryGate,
-    setEntryGate,
+    entryImage,
+    setEntryImage: handleImageCaptured,
+    isCheckingIn,
     vehicle,
     slots,
     selectedSlot,
@@ -108,3 +141,5 @@ export function useVehicleEntry() {
     handleCheckIn,
   };
 }
+
+

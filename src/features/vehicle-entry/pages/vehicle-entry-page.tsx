@@ -12,9 +12,9 @@ export default function VehicleEntryPage() {
     licensePlate,
     setLicensePlate,
     vehicleType,
-    setVehicleType,
     entryGate,
-    setEntryGate,
+    setEntryImage,
+    isCheckingIn,
     vehicle,
     slots,
     selectedSlot,
@@ -43,10 +43,9 @@ export default function VehicleEntryPage() {
             licensePlate={licensePlate}
             setLicensePlate={setLicensePlate}
             vehicleType={vehicleType}
-            setVehicleType={setVehicleType}
             entryGate={entryGate}
-            setEntryGate={setEntryGate}
             vehicle={vehicle}
+            onImageCaptured={setEntryImage}
             onSearch={handleSearchVehicle}
             onLoadSlots={loadAvailableSlots}
           />
@@ -65,8 +64,13 @@ export default function VehicleEntryPage() {
         </div>
 
         {/* Action cuối */}
-        <VehicleEntryActions selectedSlot={selectedSlot} onCheckIn={handleCheckIn} />
+        <VehicleEntryActions
+          selectedSlot={selectedSlot}
+          isCheckingIn={isCheckingIn}
+          onCheckIn={handleCheckIn}
+        />
       </div>
     </DashboardLayout>
   );
 }
+

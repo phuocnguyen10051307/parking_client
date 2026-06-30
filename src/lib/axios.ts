@@ -1,4 +1,4 @@
-// Config axios instance
+﻿// Config axios instance
 import { useAuthStore } from '@/store/auth-store';
 import axios from 'axios';
 
@@ -7,23 +7,12 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// Gắn accessToken vào header Authorization nếu có
-api.interceptors.request.use((config) => {
-  const { accessToken } = useAuthStore.getState();
-
-  if (accessToken) {
-    config.headers.Authorization = `Bearer ${accessToken}`;
-  }
-  return config;
-});
-
-// Tự động gọi refresh token khi access token hết hạn
+// Tự động gọi refresh token khi access token cookie hết hạn
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
     const originalRequest = error.config;
 
-    // Những api ko cần refresh token
     if (
       originalRequest.url?.includes('/auth/signin') ||
       originalRequest.url?.includes('/auth/signup') ||
@@ -37,17 +26,10 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && originalRequest._retryCount < 4) {
       originalRequest._retryCount += 1;
       try {
-        const res = await api.post('/auth/refresh-token', {}, { withCredentials: true });
-        const newAccessToken = res.data.data?.accessToken;
-
-        if (newAccessToken) {
-          useAuthStore.getState().setAccessToken(newAccessToken);
-        }
-
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        await api.post('/auth/refresh-token');
         return api(originalRequest);
       } catch (refreshError) {
-        console.error('Failed to refresh access token:', refreshError);
+        console.error('Failed to refresh access token cookie:', refreshError);
         useAuthStore.getState().clearState();
         return Promise.reject(refreshError);
       }
