@@ -27,3 +27,10 @@ export type FloorOption = {
   name: string;
   floorNumber: number;
 };
+
+export type SlotFormValues = {
+  zoneId: string;
+  slotCode: string;
+  status: string;
+  isActive: boolean;
+};

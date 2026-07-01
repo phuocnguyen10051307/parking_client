@@ -7,8 +7,11 @@ import {
   LayoutDashboard,
   LogOut,
   Map,
-  ParkingCircle,
   MessageSquare,
+  ParkingCircle,
+  Settings,
+  ShieldCheck,
+  Users,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -30,6 +33,7 @@ export type SidebarMenuItem = {
 const OPERATION_ROLES: UserRole[] = ['ADMIN', 'MANAGER', 'STAFF'];
 const MANAGEMENT_ROLES: UserRole[] = ['ADMIN', 'MANAGER'];
 const STAFF_ROLES: UserRole[] = ['STAFF'];
+const ADMIN_ONLY_ROLES: UserRole[] = ['ADMIN'];
 
 export const ROUTE_PERMISSIONS: RoutePermission[] = [
   { path: '/', allowedRoles: OPERATION_ROLES },
@@ -37,10 +41,10 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
   { path: '/vehicle-exit', allowedRoles: STAFF_ROLES },
   { path: '/parking-sessions', allowedRoles: OPERATION_ROLES },
   { path: '/parking-sessions/:id', allowedRoles: OPERATION_ROLES },
+  { path: '/buildings', allowedRoles: MANAGEMENT_ROLES },
   { path: '/floors', allowedRoles: MANAGEMENT_ROLES },
   { path: '/zones', allowedRoles: MANAGEMENT_ROLES },
-  { path: '/slots', allowedRoles: OPERATION_ROLES },
-  { path: '/slots/:floorId', allowedRoles: OPERATION_ROLES },
+  { path: '/slots', allowedRoles: MANAGEMENT_ROLES },
   { path: '/pricing', allowedRoles: MANAGEMENT_ROLES },
   { path: '/reports', allowedRoles: MANAGEMENT_ROLES },
   { path: '/profile', allowedRoles: OPERATION_ROLES },
@@ -48,6 +52,9 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
   { path: '/reservations/:id', allowedRoles: OPERATION_ROLES },
   { path: '/feedbacks', allowedRoles: OPERATION_ROLES },
   { path: '/feedbacks/:id', allowedRoles: OPERATION_ROLES },
+  { path: '/users', allowedRoles: ADMIN_ONLY_ROLES },
+  { path: '/roles', allowedRoles: ADMIN_ONLY_ROLES },
+  { path: '/settings', allowedRoles: ADMIN_ONLY_ROLES },
   { path: '/my-profile', allowedRoles: ['USER'] },
   { path: '/my-vehicles', allowedRoles: ['USER'] },
   { path: '/my-reservations', allowedRoles: ['USER'] },
@@ -73,13 +80,14 @@ export const SIDEBAR_MENUS: SidebarMenuItem[] = [
     icon: Clock3,
     allowedRoles: OPERATION_ROLES,
   },
+  { label: 'Buildings', path: '/buildings', icon: Building2, allowedRoles: MANAGEMENT_ROLES },
   { label: 'Floors', path: '/floors', icon: Building2, allowedRoles: MANAGEMENT_ROLES },
   { label: 'Zones', path: '/zones', icon: Map, allowedRoles: MANAGEMENT_ROLES },
   {
     label: 'Slots',
-    path: '/slots/basement-1',
+    path: '/slots',
     icon: ParkingCircle,
-    allowedRoles: OPERATION_ROLES,
+    allowedRoles: MANAGEMENT_ROLES,
     activeMatchers: ['/slots'],
   },
   { label: 'Pricing', path: '/pricing', icon: DollarSign, allowedRoles: MANAGEMENT_ROLES },
@@ -90,6 +98,9 @@ export const SIDEBAR_MENUS: SidebarMenuItem[] = [
     icon: MessageSquare,
     allowedRoles: OPERATION_ROLES,
   },
+  { label: 'Users', path: '/users', icon: Users, allowedRoles: ADMIN_ONLY_ROLES },
+  { label: 'Roles', path: '/roles', icon: ShieldCheck, allowedRoles: ADMIN_ONLY_ROLES },
+  { label: 'Settings', path: '/settings', icon: Settings, allowedRoles: ADMIN_ONLY_ROLES },
 ];
 
 export function normalizeRole(role?: string | null): UserRole | null {

@@ -1,160 +1,345 @@
+import { Building2, PencilLine, Plus, Trash2, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import { DashboardLayout } from '@/app/layouts/dashboard-layout';
-import { slotsApi } from '@/features/slots/api/slots-api';
-import type { BackendSlot } from '@/features/slots/types/backend-slot.type';
+import { Button } from '@/components/ui/button';
+import { Field, FieldContent, FieldLabel } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { buildingsApi } from '@/features/buildings/api/buildings-api';
+import type { Building } from '@/features/buildings/types/building';
+import { confirmToast } from '@/lib/confirm-toast';
 
-import { FloorCard } from '../components/floor-card';
-import { FloorHealthChart } from '../components/floor-health-chart';
-import { FloorInsightCard } from '../components/floor-insight-card';
-import type { Floor } from '../types/floor';
+import { floorsApi } from '../api/floors-api';
+import type { Floor, FloorFormValues } from '../types/floor';
 
-const getFloorName = (floorNumber: number) =>
+const VEHICLE_TYPES = ['MOTORBIKE', 'CAR', 'BICYCLE', 'ELECTRIC_BIKE'];
+
+type ManagedFloor = Floor & {
+  building: NonNullable<Floor['building']>;
+  buildingId: string;
+  floorNumber: number;
+  vehicleType: string;
+};
+
+const defaultForm: FloorFormValues = {
+  buildingId: '',
+  floorNumber: '',
+  vehicleType: 'CAR',
+};
+
+const getErrorMessage = (error: unknown, fallback: string) => {
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'response' in error &&
+    typeof error.response === 'object' &&
+    error.response !== null &&
+    'data' in error.response &&
+    typeof error.response.data === 'object' &&
+    error.response.data !== null &&
+    'message' in error.response.data &&
+    typeof error.response.data.message === 'string'
+  ) {
+    return error.response.data.message;
+  }
+
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return fallback;
+};
+
+const formatVehicleType = (vehicleType: string) => vehicleType.replaceAll('_', ' ');
+const formatFloorLabel = (floorNumber: number) =>
   floorNumber < 0 ? `Basement ${Math.abs(floorNumber)}` : `Level ${floorNumber}`;
+const isManagedFloor = (floor: Floor): floor is ManagedFloor =>
+  typeof floor.buildingId === 'string' &&
+  typeof floor.floorNumber === 'number' &&
+  typeof floor.vehicleType === 'string' &&
+  typeof floor.building === 'object' &&
+  floor.building !== null;
 
-const buildFloorsFromSlots = (slots: BackendSlot[]): Floor[] => {
-  const floorMap = new Map<string, { floor: Floor; maintenanceSlots: number }>();
+export default function FloorsPage() {
+  const [buildings, setBuildings] = useState<Building[]>([]);
+  const [floors, setFloors] = useState<Floor[]>([]);
+  const [form, setForm] = useState<FloorFormValues>(defaultForm);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
-  slots.forEach((slot) => {
-    const floor = slot.zone?.floor;
+  const managedFloors = useMemo(() => floors.filter(isManagedFloor), [floors]);
 
-    if (!floor) {
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [buildingsData, floorsData] = await Promise.all([
+        buildingsApi.getBuildings(),
+        floorsApi.getFloors(),
+      ]);
+      setBuildings(buildingsData);
+      setFloors(floorsData);
+      setForm((current) => ({
+        ...current,
+        buildingId: current.buildingId || buildingsData[0]?.id || '',
+      }));
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Failed to load floors'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void loadData();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  const resetForm = () => {
+    setEditingId(null);
+    setForm({
+      ...defaultForm,
+      buildingId: buildings[0]?.id || '',
+    });
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const floorNumber = Number(form.floorNumber);
+
+    if (!form.buildingId || !Number.isInteger(floorNumber) || !form.vehicleType) {
+      toast.error('Please select a building and enter a valid floor number');
       return;
     }
 
-    const current = floorMap.get(floor.id) ?? {
-      floor: {
-        id: floor.id,
-        name: getFloorName(floor.floorNumber),
-        description: `${floor.vehicleType.replaceAll('_', ' ')} parking level`,
-        totalSlots: 0,
-        occupiedSlots: 0,
-        availability: 0,
-        status: 'Operational' as const,
-      },
-      maintenanceSlots: 0,
-    };
-
-    current.floor.totalSlots += 1;
-
-    if (slot.status === 'OCCUPIED' || slot.status === 'RESERVED') {
-      current.floor.occupiedSlots += 1;
-    }
-
-    if (slot.status === 'MAINTENANCE' || slot.status === 'BLOCKED') {
-      current.maintenanceSlots += 1;
-    }
-
-    floorMap.set(floor.id, current);
-  });
-
-  return Array.from(floorMap.values())
-    .map(({ floor, maintenanceSlots }) => {
-      const availability =
-        floor.totalSlots > 0
-          ? Math.round(((floor.totalSlots - floor.occupiedSlots) / floor.totalSlots) * 100)
-          : 0;
-      const occupancy = floor.totalSlots > 0 ? (floor.occupiedSlots / floor.totalSlots) * 100 : 0;
-
-      const status: Floor['status'] =
-        maintenanceSlots > 0 ? 'Maintenance' : occupancy >= 85 ? 'Near Capacity' : 'Operational';
-
-      return {
-        ...floor,
-        availability,
-        status,
+    try {
+      setSubmitting(true);
+      const payload = {
+        buildingId: form.buildingId,
+        floorNumber,
+        vehicleType: form.vehicleType,
       };
-    })
-    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
-};
 
-export default function FloorsPage() {
-  const [slots, setSlots] = useState<BackendSlot[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchSlots = async () => {
-      try {
-        setLoading(true);
-        const data = await slotsApi.getSlots();
-        setSlots(data);
-      } catch {
-        toast.error('Failed to load floors');
-      } finally {
-        setLoading(false);
+      if (editingId) {
+        await floorsApi.updateFloor(editingId, payload);
+        toast.success('Floor updated');
+      } else {
+        await floorsApi.createFloor(payload);
+        toast.success('Floor created');
       }
-    };
 
-    fetchSlots();
-  }, []);
+      resetForm();
+      await loadData();
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Failed to save floor'));
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
-  const floors = useMemo(() => buildFloorsFromSlots(slots), [slots]);
-  const totalSlots = floors.reduce((total, floor) => total + floor.totalSlots, 0);
-  const occupiedSlots = floors.reduce((total, floor) => total + floor.occupiedSlots, 0);
-  const occupancy = totalSlots > 0 ? Math.round((occupiedSlots / totalSlots) * 100) : 0;
-  const healthValues = floors.map((floor) => floor.availability);
+  const handleEdit = (floor: ManagedFloor) => {
+    setEditingId(floor.id);
+    setForm({
+      buildingId: floor.buildingId,
+      floorNumber: String(floor.floorNumber),
+      vehicleType: floor.vehicleType,
+    });
+  };
+
+  const handleDelete = (floor: ManagedFloor) => {
+    confirmToast({
+      title: `Delete ${formatFloorLabel(floor.floorNumber)} from ${floor.building.name}?`,
+      description: 'This action cannot be undone.',
+      actionLabel: 'Delete',
+      onConfirm: async () => {
+        try {
+          await floorsApi.deleteFloor(floor.id);
+          toast.success('Floor deleted');
+          if (editingId === floor.id) {
+            resetForm();
+          }
+          await loadData();
+        } catch (error) {
+          toast.error(getErrorMessage(error, 'Failed to delete floor'));
+        }
+      },
+    });
+  };
 
   return (
     <DashboardLayout>
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <div className="text-3xl font-semibold text-blue-900">Floor Management</div>
-          <p className="mt-2 text-slate-500">Manage parking levels and monitor occupancy.</p>
-        </div>
-      </div>
-
-      <div className="mb-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium uppercase tracking-wider text-slate-500">
-              Facility Overview
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-6 grid grid-cols-3 gap-6">
-          <div className="rounded-2xl bg-blue-50 p-5">
-            <p className="text-sm text-slate-500">Active Floors</p>
-            <h3 className="mt-2 text-4xl font-bold text-blue-900">{floors.length}</h3>
-            <p className="mt-1 text-sm text-green-600">Live from slot data</p>
+      <div className="grid gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium uppercase tracking-[0.2em] text-slate-500">
+                Floor CRUD
+              </p>
+              <h1 className="mt-2 text-3xl font-semibold text-slate-900">Manage floors</h1>
+              <p className="mt-2 text-sm text-slate-500">
+                Each floor belongs to one building and one vehicle type assignment.
+              </p>
+            </div>
+            <div className="rounded-2xl bg-emerald-50 p-3 text-emerald-700">
+              <Building2 size={24} />
+            </div>
           </div>
 
-          <div className="rounded-2xl bg-emerald-50 p-5">
-            <p className="text-sm text-slate-500">Total Capacity</p>
-            <h3 className="mt-2 text-4xl font-bold text-emerald-700">{totalSlots}</h3>
-            <p className="mt-1 text-sm text-slate-600">Parking slots available</p>
+          <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+            <Field>
+              <FieldLabel>Building</FieldLabel>
+              <FieldContent>
+                <select
+                  className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm"
+                  disabled={buildings.length === 0}
+                  value={form.buildingId}
+                  onChange={(event) =>
+                    setForm((current) => ({ ...current, buildingId: event.target.value }))
+                  }
+                >
+                  <option value="">Select building</option>
+                  {buildings.map((building) => (
+                    <option key={building.id} value={building.id}>
+                      {building.name}
+                    </option>
+                  ))}
+                </select>
+              </FieldContent>
+            </Field>
+
+            <Field>
+              <FieldLabel>Floor number</FieldLabel>
+              <FieldContent>
+                <Input
+                  type="number"
+                  value={form.floorNumber}
+                  onChange={(event) =>
+                    setForm((current) => ({ ...current, floorNumber: event.target.value }))
+                  }
+                  placeholder="1 or -1"
+                />
+              </FieldContent>
+            </Field>
+
+            <Field>
+              <FieldLabel>Vehicle type</FieldLabel>
+              <FieldContent>
+                <select
+                  className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm"
+                  value={form.vehicleType}
+                  onChange={(event) =>
+                    setForm((current) => ({ ...current, vehicleType: event.target.value }))
+                  }
+                >
+                  {VEHICLE_TYPES.map((vehicleType) => (
+                    <option key={vehicleType} value={vehicleType}>
+                      {formatVehicleType(vehicleType)}
+                    </option>
+                  ))}
+                </select>
+              </FieldContent>
+            </Field>
+
+            <div className="flex gap-3 pt-2">
+              <Button
+                className="flex-1"
+                disabled={submitting || buildings.length === 0}
+                type="submit"
+              >
+                {editingId ? <PencilLine /> : <Plus />}
+                {editingId ? 'Update floor' : 'Create floor'}
+              </Button>
+              {editingId ? (
+                <Button onClick={resetForm} type="button" variant="outline">
+                  <X />
+                  Cancel
+                </Button>
+              ) : null}
+            </div>
+          </form>
+        </section>
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-semibold text-slate-900">Floor list</h2>
+              <p className="mt-1 text-sm text-slate-500">
+                Delete is blocked when a floor still has zones.
+              </p>
+            </div>
+            <div className="rounded-2xl bg-slate-100 px-4 py-2 text-sm font-medium text-slate-600">
+              {managedFloors.length} floors
+            </div>
           </div>
 
-          <div className="rounded-2xl bg-amber-50 p-5">
-            <p className="text-sm text-slate-500">Current Occupancy</p>
-            <h3 className="mt-2 text-4xl font-bold text-amber-600">{occupancy}%</h3>
-            <p className="mt-1 text-sm text-slate-600">
-              {occupiedSlots} / {totalSlots} slots occupied
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="rounded-3xl border bg-white p-10 text-center text-slate-500 shadow-sm">
-          Loading floors...
-        </div>
-      ) : floors.length > 0 ? (
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {floors.map((floor) => (
-            <FloorCard key={floor.id} floor={floor} />
-          ))}
-        </div>
-      ) : (
-        <div className="rounded-3xl border bg-white p-10 text-center text-slate-500 shadow-sm">
-          No floor data found.
-        </div>
-      )}
-
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        <FloorHealthChart values={healthValues.length > 0 ? healthValues : [0]} />
-        <FloorInsightCard />
+          {loading ? (
+            <div className="mt-6 rounded-2xl border border-dashed border-slate-200 p-8 text-center text-slate-500">
+              Loading floors...
+            </div>
+          ) : managedFloors.length === 0 ? (
+            <div className="mt-6 rounded-2xl border border-dashed border-slate-200 p-8 text-center text-slate-500">
+              No floors found.
+            </div>
+          ) : (
+            <div className="mt-6 overflow-x-auto">
+              <table className="min-w-full text-left text-sm">
+                <thead className="border-b border-slate-200 text-slate-500">
+                  <tr>
+                    <th className="pb-3 pr-4 font-medium">Building</th>
+                    <th className="pb-3 pr-4 font-medium">Floor</th>
+                    <th className="pb-3 pr-4 font-medium">Vehicle type</th>
+                    <th className="pb-3 pr-4 font-medium">Zones</th>
+                    <th className="pb-3 text-right font-medium">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {managedFloors.map((floor) => (
+                    <tr key={floor.id} className="border-b border-slate-100 align-top">
+                      <td className="py-4 pr-4">
+                        <div className="font-medium text-slate-900">{floor.building.name}</div>
+                        <div className="text-slate-500">{floor.building.address}</div>
+                      </td>
+                      <td className="py-4 pr-4 text-slate-600">
+                        {formatFloorLabel(floor.floorNumber)}
+                      </td>
+                      <td className="py-4 pr-4 text-slate-600">
+                        {formatVehicleType(floor.vehicleType)}
+                      </td>
+                      <td className="py-4 pr-4 text-slate-600">{floor._count?.zones ?? 0}</td>
+                      <td className="py-4 text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            onClick={() => handleEdit(floor)}
+                            size="sm"
+                            type="button"
+                            variant="outline"
+                          >
+                            <PencilLine />
+                            Edit
+                          </Button>
+                          <Button
+                            onClick={() => handleDelete(floor)}
+                            size="sm"
+                            type="button"
+                            variant="destructive"
+                          >
+                            <Trash2 />
+                            Delete
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
       </div>
     </DashboardLayout>
   );

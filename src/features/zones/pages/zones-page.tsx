@@ -1,179 +1,327 @@
+import { Map, PencilLine, Plus, Trash2, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import { DashboardLayout } from '@/app/layouts/dashboard-layout';
-import { slotsApi } from '@/features/slots/api/slots-api';
-import type { BackendSlot } from '@/features/slots/types/backend-slot.type';
+import { Button } from '@/components/ui/button';
+import { Field, FieldContent, FieldLabel } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { floorsApi } from '@/features/floors/api/floors-api';
+import type { Floor } from '@/features/floors/types/floor';
+import { confirmToast } from '@/lib/confirm-toast';
 
-import { ZoneActivityCard } from '../components/zone-activity-card';
-import { ZoneCard } from '../components/zone-card';
-import { ZoneSummaryCard } from '../components/zone-summary-card';
-import { ZoneFilterBar } from '../components/zone-filter-bar';
-import type { Zone, ZoneFloorFilter } from '../types/zone';
+import { zonesApi } from '../api/zones-api';
+import type { Zone, ZoneFormValues } from '../types/zone';
 
-const getFloorName = (floorNumber: number) =>
-  floorNumber < 0 ? `Basement ${Math.abs(floorNumber)}` : `Level ${floorNumber}`;
+const defaultForm: ZoneFormValues = {
+  floorId: '',
+  name: '',
+};
+
+type ManagedFloor = Floor & {
+  building: NonNullable<Floor['building']>;
+  floorNumber: number;
+  vehicleType: string;
+};
+
+type ManagedZone = Zone & {
+  floor: Exclude<Zone['floor'], string>;
+};
+
+const getErrorMessage = (error: unknown, fallback: string) => {
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'response' in error &&
+    typeof error.response === 'object' &&
+    error.response !== null &&
+    'data' in error.response &&
+    typeof error.response.data === 'object' &&
+    error.response.data !== null &&
+    'message' in error.response.data &&
+    typeof error.response.data.message === 'string'
+  ) {
+    return error.response.data.message;
+  }
+
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return fallback;
+};
 
 const formatVehicleType = (vehicleType: string) => vehicleType.replaceAll('_', ' ');
+const formatFloorLabel = (floorNumber: number) =>
+  floorNumber < 0 ? `Basement ${Math.abs(floorNumber)}` : `Level ${floorNumber}`;
+const isManagedFloor = (floor: Floor): floor is ManagedFloor =>
+  typeof floor.floorNumber === 'number' &&
+  typeof floor.vehicleType === 'string' &&
+  typeof floor.building === 'object' &&
+  floor.building !== null;
+const isManagedZone = (zone: Zone): zone is ManagedZone =>
+  typeof zone.floor === 'object' && zone.floor !== null;
 
-const buildZonesFromSlots = (slots: BackendSlot[]): Zone[] => {
-  const zoneMap = new Map<string, Zone>();
+export default function ZonesPage() {
+  const [floors, setFloors] = useState<Floor[]>([]);
+  const [zones, setZones] = useState<Zone[]>([]);
+  const [form, setForm] = useState<ZoneFormValues>(defaultForm);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
-  slots.forEach((slot) => {
-    const zone = slot.zone;
-    const floor = zone?.floor;
+  const managedFloors = useMemo(() => floors.filter(isManagedFloor), [floors]);
+  const managedZones = useMemo(() => zones.filter(isManagedZone), [zones]);
 
-    if (!zone || !floor) {
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [floorsData, zonesData] = await Promise.all([
+        floorsApi.getFloors(),
+        zonesApi.getZones(),
+      ]);
+      setFloors(floorsData);
+      setZones(zonesData);
+      setForm((current) => ({
+        ...current,
+        floorId: current.floorId || floorsData.find(isManagedFloor)?.id || '',
+      }));
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Failed to load zones'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void loadData();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  const resetForm = () => {
+    setEditingId(null);
+    setForm({
+      ...defaultForm,
+      floorId: managedFloors[0]?.id || '',
+    });
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!form.floorId || !form.name.trim()) {
+      toast.error('Please select a floor and enter a zone name');
       return;
     }
 
-    const current = zoneMap.get(zone.id) ?? {
-      id: zone.id,
+    try {
+      setSubmitting(true);
+      const payload = {
+        floorId: form.floorId,
+        name: form.name.trim(),
+      };
+
+      if (editingId) {
+        await zonesApi.updateZone(editingId, payload);
+        toast.success('Zone updated');
+      } else {
+        await zonesApi.createZone(payload);
+        toast.success('Zone created');
+      }
+
+      resetForm();
+      await loadData();
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Failed to save zone'));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleEdit = (zone: ManagedZone) => {
+    setEditingId(zone.id);
+    setForm({
+      floorId: zone.floorId,
       name: zone.name,
-      floorId: floor.id,
-      floor: getFloorName(floor.floorNumber),
-      vehicleType: slot.vehicleType,
-      type: formatVehicleType(slot.vehicleType),
-      occupied: 0,
-      capacity: 0,
-      status: 'Operational',
-      note: 'Live occupancy from slot data',
-    };
+    });
+  };
 
-    current.capacity += 1;
-
-    if (slot.status === 'OCCUPIED' || slot.status === 'RESERVED') {
-      current.occupied += 1;
-    }
-
-    if (slot.status === 'MAINTENANCE' || slot.status === 'BLOCKED') {
-      current.status = 'Maintenance';
-      current.note = 'Some slots need attention';
-    }
-
-    zoneMap.set(zone.id, current);
-  });
-
-  return Array.from(zoneMap.values())
-    .map((zone) => {
-      const occupancy = zone.capacity > 0 ? (zone.occupied / zone.capacity) * 100 : 0;
-
-      if (zone.status !== 'Maintenance' && occupancy >= 85) {
-        return { ...zone, status: 'Near Capacity', note: 'Capacity warning' };
-      }
-
-      return zone;
-    })
-    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
-};
-
-const buildFloorFilters = (slots: BackendSlot[]): ZoneFloorFilter[] => {
-  const floorMap = new Map<string, ZoneFloorFilter>();
-
-  slots.forEach((slot) => {
-    const floor = slot.zone?.floor;
-
-    if (floor) {
-      floorMap.set(floor.id, {
-        id: floor.id,
-        name: getFloorName(floor.floorNumber),
-      });
-    }
-  });
-
-  return Array.from(floorMap.values()).sort((a, b) =>
-    a.name.localeCompare(b.name, undefined, { numeric: true })
-  );
-};
-
-export default function ZonesPage() {
-  const [slots, setSlots] = useState<BackendSlot[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedFloorId, setSelectedFloorId] = useState('all');
-  const [selectedVehicleType, setSelectedVehicleType] = useState('all');
-
-  useEffect(() => {
-    const fetchSlots = async () => {
-      try {
-        setLoading(true);
-        const data = await slotsApi.getSlots();
-        setSlots(data);
-      } catch {
-        toast.error('Failed to load zones');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSlots();
-  }, []);
-
-  const zones = useMemo(() => buildZonesFromSlots(slots), [slots]);
-  const floors = useMemo(() => buildFloorFilters(slots), [slots]);
-  const vehicleTypes = useMemo(
-    () => Array.from(new Set(slots.map((slot) => slot.vehicleType))).sort(),
-    [slots]
-  );
-
-  const filteredZones = useMemo(
-    () =>
-      zones.filter((zone) => {
-        const matchesFloor = selectedFloorId === 'all' || zone.floorId === selectedFloorId;
-        const matchesVehicle =
-          selectedVehicleType === 'all' || zone.vehicleType === selectedVehicleType;
-
-        return matchesFloor && matchesVehicle;
-      }),
-    [zones, selectedFloorId, selectedVehicleType]
-  );
-
-  const maintenanceZones = zones.filter((zone) => zone.status === 'Maintenance').length;
-  const nearCapacityZones = zones.filter((zone) => zone.status === 'Near Capacity').length;
-  const totalCapacity = zones.reduce((total, zone) => total + zone.capacity, 0);
+  const handleDelete = (zone: ManagedZone) => {
+    confirmToast({
+      title: `Delete zone "${zone.name}"?`,
+      description: 'This action cannot be undone.',
+      actionLabel: 'Delete',
+      onConfirm: async () => {
+        try {
+          await zonesApi.deleteZone(zone.id);
+          toast.success('Zone deleted');
+          if (editingId === zone.id) {
+            resetForm();
+          }
+          await loadData();
+        } catch (error) {
+          toast.error(getErrorMessage(error, 'Failed to delete zone'));
+        } finally {
+          setSubmitting(false);
+        }
+      },
+    });
+  };
 
   return (
     <DashboardLayout>
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <div className="text-3xl font-semibold text-blue-900">Zone Management</div>
-          <p className="mt-2 text-slate-500">Optimize and monitor parking availability.</p>
-        </div>
-      </div>
+      <div className="grid gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium uppercase tracking-[0.2em] text-slate-500">
+                Zone CRUD
+              </p>
+              <h1 className="mt-2 text-3xl font-semibold text-slate-900">Manage zones</h1>
+              <p className="mt-2 text-sm text-slate-500">
+                Each zone belongs to a floor. Delete is blocked when parking slots already exist.
+              </p>
+            </div>
+            <div className="rounded-2xl bg-amber-50 p-3 text-amber-700">
+              <Map size={24} />
+            </div>
+          </div>
 
-      <div className="mb-8 grid gap-4 md:grid-cols-4">
-        <ZoneSummaryCard title="Total Zones" value={String(zones.length)} />
-        <ZoneSummaryCard title="Total Capacity" value={String(totalCapacity)} />
-        <ZoneSummaryCard title="Near Capacity" value={String(nearCapacityZones)} />
-        <ZoneSummaryCard title="Maintenance" value={String(maintenanceZones)} />
-      </div>
+          <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+            <Field>
+              <FieldLabel>Floor</FieldLabel>
+              <FieldContent>
+                <select
+                  className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm"
+                  disabled={managedFloors.length === 0}
+                  value={form.floorId}
+                  onChange={(event) =>
+                    setForm((current) => ({ ...current, floorId: event.target.value }))
+                  }
+                >
+                  <option value="">Select floor</option>
+                  {managedFloors.map((floor) => (
+                    <option key={floor.id} value={floor.id}>
+                      {floor.building.name} - {formatFloorLabel(floor.floorNumber)} -{' '}
+                      {formatVehicleType(floor.vehicleType)}
+                    </option>
+                  ))}
+                </select>
+              </FieldContent>
+            </Field>
 
-      <ZoneFilterBar
-        floors={floors}
-        selectedFloorId={selectedFloorId}
-        selectedVehicleType={selectedVehicleType}
-        vehicleTypes={vehicleTypes}
-        onFloorChange={setSelectedFloorId}
-        onVehicleTypeChange={setSelectedVehicleType}
-      />
+            <Field>
+              <FieldLabel>Zone name</FieldLabel>
+              <FieldContent>
+                <Input
+                  value={form.name}
+                  onChange={(event) =>
+                    setForm((current) => ({ ...current, name: event.target.value }))
+                  }
+                  placeholder="Zone A"
+                />
+              </FieldContent>
+            </Field>
 
-      {loading ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center text-slate-500 shadow-sm">
-          Loading zones...
-        </div>
-      ) : filteredZones.length > 0 ? (
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {filteredZones.map((zone) => (
-            <ZoneCard key={zone.id} zone={zone} />
-          ))}
-        </div>
-      ) : (
-        <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center text-slate-500 shadow-sm">
-          No zones found.
-        </div>
-      )}
+            <div className="flex gap-3 pt-2">
+              <Button
+                className="flex-1"
+                disabled={submitting || managedFloors.length === 0}
+                type="submit"
+              >
+                {editingId ? <PencilLine /> : <Plus />}
+                {editingId ? 'Update zone' : 'Create zone'}
+              </Button>
+              {editingId ? (
+                <Button onClick={resetForm} type="button" variant="outline">
+                  <X />
+                  Cancel
+                </Button>
+              ) : null}
+            </div>
+          </form>
+        </section>
 
-      <div className="mt-10">
-        <ZoneActivityCard />
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-semibold text-slate-900">Zone list</h2>
+              <p className="mt-1 text-sm text-slate-500">
+                A zone name must be unique inside its floor.
+              </p>
+            </div>
+            <div className="rounded-2xl bg-slate-100 px-4 py-2 text-sm font-medium text-slate-600">
+              {managedZones.length} zones
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="mt-6 rounded-2xl border border-dashed border-slate-200 p-8 text-center text-slate-500">
+              Loading zones...
+            </div>
+          ) : managedZones.length === 0 ? (
+            <div className="mt-6 rounded-2xl border border-dashed border-slate-200 p-8 text-center text-slate-500">
+              No zones found.
+            </div>
+          ) : (
+            <div className="mt-6 overflow-x-auto">
+              <table className="min-w-full text-left text-sm">
+                <thead className="border-b border-slate-200 text-slate-500">
+                  <tr>
+                    <th className="pb-3 pr-4 font-medium">Zone</th>
+                    <th className="pb-3 pr-4 font-medium">Building</th>
+                    <th className="pb-3 pr-4 font-medium">Floor</th>
+                    <th className="pb-3 pr-4 font-medium">Slots</th>
+                    <th className="pb-3 text-right font-medium">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {managedZones.map((zone) => (
+                    <tr key={zone.id} className="border-b border-slate-100 align-top">
+                      <td className="py-4 pr-4 font-medium text-slate-900">{zone.name}</td>
+                      <td className="py-4 pr-4">
+                        <div className="font-medium text-slate-900">{zone.floor.building.name}</div>
+                        <div className="text-slate-500">{zone.floor.building.address}</div>
+                      </td>
+                      <td className="py-4 pr-4 text-slate-600">
+                        {formatFloorLabel(zone.floor.floorNumber)}
+                        <div className="text-slate-500">
+                          {formatVehicleType(zone.floor.vehicleType)}
+                        </div>
+                      </td>
+                      <td className="py-4 pr-4 text-slate-600">{zone._count?.slots ?? 0}</td>
+                      <td className="py-4 text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            onClick={() => handleEdit(zone)}
+                            size="sm"
+                            type="button"
+                            variant="outline"
+                          >
+                            <PencilLine />
+                            Edit
+                          </Button>
+                          <Button
+                            onClick={() => handleDelete(zone)}
+                            size="sm"
+                            type="button"
+                            variant="destructive"
+                          >
+                            <Trash2 />
+                            Delete
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
       </div>
     </DashboardLayout>
   );
