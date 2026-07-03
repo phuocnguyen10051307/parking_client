@@ -3,6 +3,8 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { Trash2, Plus, Pencil, Save } from 'lucide-react';
 
+import { formatLicensePlate } from '@/lib/license-plate';
+
 import { vehiclesApi } from '../api/vehicles-api';
 
 type Vehicle = {
@@ -14,16 +16,9 @@ type Vehicle = {
 };
 
 export default function MyVehiclesPage() {
-  // State danh sách xe
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-
-  // State loading
   const [loading, setLoading] = useState(false);
-
-  // State edit mode
   const [editingId, setEditingId] = useState<string | null>(null);
-
-  // State form
   const [form, setForm] = useState({
     licensePlate: '',
     vehicleType: 'CAR',
@@ -31,7 +26,6 @@ export default function MyVehiclesPage() {
     color: '',
   });
 
-  // Load danh sách xe
   const loadVehicles = async () => {
     try {
       setLoading(true);
@@ -52,7 +46,6 @@ export default function MyVehiclesPage() {
     }
   };
 
-  // Load page lần đầu
   useEffect(() => {
     const fetchData = async () => {
       await loadVehicles();
@@ -61,27 +54,24 @@ export default function MyVehiclesPage() {
     fetchData();
   }, []);
 
-  // Update input form
   const handleChange = (field: string, value: string) => {
     setForm((prev) => ({
       ...prev,
-      [field]: value,
+      [field]: field === 'licensePlate' ? formatLicensePlate(value) : value,
     }));
   };
 
-  // Edit vehicle → đổ dữ liệu lên form
   const handleEditVehicle = (vehicle: Vehicle) => {
     setEditingId(vehicle.id);
 
     setForm({
-      licensePlate: vehicle.licensePlate,
+      licensePlate: formatLicensePlate(vehicle.licensePlate),
       vehicleType: vehicle.vehicleType,
       brand: vehicle.brand || '',
       color: vehicle.color || '',
     });
   };
 
-  // Reset form
   const resetForm = () => {
     setForm({
       licensePlate: '',
@@ -93,23 +83,17 @@ export default function MyVehiclesPage() {
     setEditingId(null);
   };
 
-  // Create / Update vehicle
   const handleSaveVehicle = async () => {
     try {
       if (editingId) {
-        // Update
         await vehiclesApi.updateVehicle(editingId, form);
-
         toast.success('Vehicle updated successfully');
       } else {
-        // Create
         await vehiclesApi.createVehicle(form);
-
         toast.success('Vehicle added successfully');
       }
 
       resetForm();
-
       await loadVehicles();
     } catch (error: unknown) {
       console.error('Save vehicle failed:', error);
@@ -122,7 +106,6 @@ export default function MyVehiclesPage() {
     }
   };
 
-  // Delete vehicle với confirm bằng sonner
   const handleDeleteVehicle = (id: string) => {
     toast('Delete this vehicle?', {
       description: 'This action cannot be undone.',
@@ -149,36 +132,31 @@ export default function MyVehiclesPage() {
     });
   };
 
-  // Loading UI
   if (loading) {
     return <p className="p-6">Loading vehicles...</p>;
   }
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-blue-900">My Vehicles</h1>
 
         <p className="mt-2 text-slate-500">Manage your registered vehicles.</p>
       </div>
 
-      {/* Form add/update */}
       <div className="rounded-2xl border bg-white p-6 shadow-sm">
         <h2 className="mb-5 text-xl font-semibold">
           {editingId ? 'Update Vehicle' : 'Add New Vehicle'}
         </h2>
 
         <div className="grid gap-4 md:grid-cols-2">
-          {/* License plate */}
           <input
             value={form.licensePlate}
             onChange={(e) => handleChange('licensePlate', e.target.value)}
-            placeholder="License Plate"
+            placeholder="51A-234.44"
             className="rounded-xl border p-3"
           />
 
-          {/* Vehicle type */}
           <select
             value={form.vehicleType}
             onChange={(e) => handleChange('vehicleType', e.target.value)}
@@ -190,7 +168,6 @@ export default function MyVehiclesPage() {
             <option value="ELECTRIC_BIKE">Electric Bike</option>
           </select>
 
-          {/* Brand */}
           <input
             value={form.brand}
             onChange={(e) => handleChange('brand', e.target.value)}
@@ -198,7 +175,6 @@ export default function MyVehiclesPage() {
             className="rounded-xl border p-3"
           />
 
-          {/* Color */}
           <input
             value={form.color}
             onChange={(e) => handleChange('color', e.target.value)}
@@ -207,9 +183,7 @@ export default function MyVehiclesPage() {
           />
         </div>
 
-        {/* Actions */}
         <div className="mt-5 flex gap-3">
-          {/* Save */}
           <button
             onClick={handleSaveVehicle}
             className="flex items-center gap-2 rounded-xl bg-blue-900 px-5 py-3 text-white transition hover:bg-blue-800"
@@ -218,7 +192,6 @@ export default function MyVehiclesPage() {
             {editingId ? 'Update Vehicle' : 'Add Vehicle'}
           </button>
 
-          {/* Cancel edit */}
           {editingId && (
             <button
               onClick={resetForm}
@@ -230,7 +203,6 @@ export default function MyVehiclesPage() {
         </div>
       </div>
 
-      {/* Danh sách xe */}
       <div className="rounded-2xl border bg-white p-6 shadow-sm">
         <h2 className="mb-5 text-xl font-semibold">Registered Vehicles</h2>
 
@@ -243,18 +215,15 @@ export default function MyVehiclesPage() {
                 key={vehicle.id}
                 className="flex items-center justify-between rounded-xl border p-4"
               >
-                {/* Info */}
                 <div>
-                  <p className="font-semibold">{vehicle.licensePlate}</p>
+                  <p className="font-semibold">{formatLicensePlate(vehicle.licensePlate)}</p>
 
                   <p className="text-sm text-slate-500">
-                    {vehicle.vehicleType} • {vehicle.brand || 'N/A'} • {vehicle.color || 'N/A'}
+                    {vehicle.vehicleType} � {vehicle.brand || 'N/A'} � {vehicle.color || 'N/A'}
                   </p>
                 </div>
 
-                {/* Actions */}
                 <div className="flex items-center gap-2">
-                  {/* Edit */}
                   <button
                     onClick={() => handleEditVehicle(vehicle)}
                     className="rounded-lg p-2 text-blue-600 transition hover:bg-blue-50"
@@ -262,7 +231,6 @@ export default function MyVehiclesPage() {
                     <Pencil size={18} />
                   </button>
 
-                  {/* Delete */}
                   <button
                     onClick={() => handleDeleteVehicle(vehicle.id)}
                     className="rounded-lg p-2 text-red-500 transition hover:bg-red-50"

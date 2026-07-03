@@ -2,20 +2,16 @@ import axios from 'axios';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
+import { compactLicensePlate, formatLicensePlate } from '@/lib/license-plate';
+
 import { vehicleEntryApi } from '../api/vehicle-entry-api';
 import type { EntrySlot, EntryVehicle } from '../types/vehicle-entry.type';
 
 const DEFAULT_VEHICLE_TYPE = 'CAR';
 const DEFAULT_ENTRY_GATE = 'B1';
 
-const normalizePlate = (plate: string) =>
-  plate
-    .trim()
-    .toUpperCase()
-    .replace(/[^A-Z0-9]/g, '');
-
 export function useVehicleEntry() {
-  const [licensePlate, setLicensePlate] = useState('');
+  const [licensePlate, setLicensePlateState] = useState('');
   const [vehicleType] = useState(DEFAULT_VEHICLE_TYPE);
   const [entryGate] = useState(DEFAULT_ENTRY_GATE);
   const [entryImage, setEntryImage] = useState<File | null>(null);
@@ -25,8 +21,12 @@ export function useVehicleEntry() {
   const [slots, setSlots] = useState<EntrySlot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<EntrySlot | null>(null);
 
+  const setLicensePlate = (value: string) => {
+    setLicensePlateState(formatLicensePlate(value));
+  };
+
   const handleSearchVehicle = async () => {
-    const plate = normalizePlate(licensePlate);
+    const plate = compactLicensePlate(licensePlate);
 
     if (!plate) {
       toast.warning('License plate is required');
@@ -36,7 +36,7 @@ export function useVehicleEntry() {
     try {
       const vehicles = await vehicleEntryApi.findVehicleByPlate(plate);
 
-      const matchedVehicle = vehicles.find((v) => normalizePlate(v.licensePlate) === plate);
+      const matchedVehicle = vehicles.find((v) => compactLicensePlate(v.licensePlate) === plate);
 
       if (matchedVehicle) {
         setVehicle(matchedVehicle);
@@ -77,7 +77,7 @@ export function useVehicleEntry() {
   };
 
   const handleCheckIn = async () => {
-    const plate = normalizePlate(licensePlate);
+    const plate = compactLicensePlate(licensePlate);
 
     if (!plate) {
       toast.error('License plate is required');
@@ -107,7 +107,7 @@ export function useVehicleEntry() {
 
       toast.success('Parking session checked in successfully');
 
-      setLicensePlate('');
+      setLicensePlateState('');
       setVehicle(null);
       setEntryImage(null);
       setSlots([]);
@@ -141,5 +141,3 @@ export function useVehicleEntry() {
     handleCheckIn,
   };
 }
-
-
