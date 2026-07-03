@@ -11,6 +11,9 @@ export default function VehicleExitPage() {
     licensePlate,
     setLicensePlate,
     session,
+    pricingPolicy,
+    paymentMethod,
+    setPaymentMethod,
     setExitImage,
     isCheckingOut,
     handlePlateDetected,
@@ -24,7 +27,7 @@ export default function VehicleExitPage() {
         <div>
           <div className="text-3xl font-semibold text-blue-900">Vehicle Exit</div>
 
-          <p className="mt-2 text-slate-500">Process vehicle departure and payment.</p>
+          <p className="mt-2 text-slate-500">Process vehicle departure and capture payment details.</p>
         </div>
 
         <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
@@ -46,6 +49,10 @@ export default function VehicleExitPage() {
                 entryTime={session.entryTime}
                 totalFee={session.totalFee}
                 vehicleType={session.vehicle.vehicleType}
+                pricingPolicy={pricingPolicy}
+                payment={session.payment}
+                paymentMethod={paymentMethod}
+                onPaymentMethodChange={setPaymentMethod}
                 isCheckingOut={isCheckingOut}
                 onCheckout={handleCheckout}
               />
@@ -58,4 +65,3 @@ export default function VehicleExitPage() {
     </DashboardLayout>
   );
 }
-

@@ -1,61 +1,44 @@
-import { CalendarDays, CarFront, Clock3, DollarSign, MapPin } from 'lucide-react';
+import { CalendarDays, CarFront, Clock3, DollarSign, MapPin, Wallet } from 'lucide-react';
 import { useParams } from 'react-router-dom';
+
+import { formatVnd } from '@/lib/pricing';
 
 import { useMySessionDetail } from '../hooks/use-my-session-detail';
 
 export default function MyParkingSessionDetailPage() {
   const { id = '' } = useParams();
-
-  // Hook lấy detail parking session của chính user
   const { session, loading } = useMySessionDetail(id);
 
-  // Loading state
   if (loading) {
     return <p>Loading parking session detail...</p>;
   }
 
-  // Không tìm thấy
   if (!session) {
     return <p>Parking session not found.</p>;
   }
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-blue-900">Parking Session Detail</h1>
 
-        <p className="mt-2 text-slate-500">
-          View your parking session information and payment details.
-        </p>
+        <p className="mt-2 text-slate-500">View your parking session information and payment details.</p>
       </div>
 
-      {/* Summary */}
-      <div className="grid grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-4">
         <SummaryCard icon={<Clock3 size={18} />} title="Status" value={session.status} />
 
         <SummaryCard
           icon={<DollarSign size={18} />}
           title="Total Fee"
-          value={session.totalFee ? `${session.totalFee} VND` : 'Pending'}
+          value={session.totalFee != null ? formatVnd(Number(session.totalFee)) : 'Pending'}
         />
 
-        <SummaryCard
-          icon={<MapPin size={18} />}
-          title="Entry Gate"
-          value={session.entryGate || '-'}
-        />
-
-        <SummaryCard
-          icon={<MapPin size={18} />}
-          title="Exit Gate"
-          value={session.exitGate || '-'}
-        />
+        <SummaryCard icon={<MapPin size={18} />} title="Entry Gate" value={session.entryGate || '-'} />
+        <SummaryCard icon={<MapPin size={18} />} title="Exit Gate" value={session.exitGate || '-'} />
       </div>
 
-      {/* Detail */}
-      <div className="grid grid-cols-2 gap-8">
-        {/* Vehicle */}
+      <div className="grid gap-8 xl:grid-cols-2">
         <InfoCard title="Vehicle Information" icon={<CarFront size={18} />}>
           <InfoRow label="License Plate" value={session.vehicle?.licensePlate} />
           <InfoRow label="Vehicle Type" value={session.vehicle?.vehicleType} />
@@ -63,27 +46,29 @@ export default function MyParkingSessionDetailPage() {
           <InfoRow label="Color" value={session.vehicle?.color} />
         </InfoCard>
 
-        {/* Slot */}
         <InfoCard title="Parking Slot" icon={<MapPin size={18} />}>
           <InfoRow label="Slot Code" value={session.slot?.slotCode} />
           <InfoRow label="Slot Status" value={session.slot?.status} />
           <InfoRow label="Vehicle Type" value={session.slot?.vehicleType} />
         </InfoCard>
 
-        {/* Timeline */}
         <InfoCard title="Timeline" icon={<CalendarDays size={18} />}>
           <InfoRow label="Entry Time" value={new Date(session.entryTime).toLocaleString()} />
-
-          <InfoRow
-            label="Exit Time"
-            value={session.exitTime ? new Date(session.exitTime).toLocaleString() : '-'}
-          />
-
+          <InfoRow label="Exit Time" value={session.exitTime ? new Date(session.exitTime).toLocaleString() : '-'} />
           <InfoRow label="Created At" value={new Date(session.createdAt).toLocaleString()} />
+        </InfoCard>
+
+        <InfoCard title="Payment" icon={<Wallet size={18} />}>
+          <InfoRow label="Payment Status" value={session.payment?.status || 'Pending'} />
+          <InfoRow label="Method" value={session.payment?.method || '-'} />
+          <InfoRow label="Amount" value={session.payment ? formatVnd(session.payment.amount) : '-'} />
+          <InfoRow
+            label="Paid At"
+            value={session.payment?.paidAt ? new Date(session.payment.paidAt).toLocaleString() : '-'}
+          />
         </InfoCard>
       </div>
 
-      {/* Note */}
       {session.note && (
         <div className="rounded-2xl border bg-white p-5 shadow-sm">
           <h2 className="mb-3 text-lg font-semibold text-blue-900">Session Note</h2>
@@ -95,7 +80,6 @@ export default function MyParkingSessionDetailPage() {
   );
 }
 
-/* Summary card */
 function SummaryCard({
   title,
   value,
@@ -117,7 +101,6 @@ function SummaryCard({
   );
 }
 
-/* Card thông tin */
 function InfoCard({
   title,
   icon,
@@ -139,7 +122,6 @@ function InfoCard({
   );
 }
 
-/* Row hiển thị label/value */
 function InfoRow({ label, value }: { label: string; value?: string }) {
   return (
     <div className="flex items-center justify-between border-b pb-3">

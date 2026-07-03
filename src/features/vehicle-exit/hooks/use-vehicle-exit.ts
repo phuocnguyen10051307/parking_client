@@ -1,6 +1,9 @@
 import axios from 'axios';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+
+import { pricingApi } from '@/features/pricing/api/pricing-api';
+import type { PricingPolicy } from '@/features/pricing/types/pricing';
 
 import { vehicleExitApi } from '../api/vehicle-exit-api';
 import type { ExitSession } from '../types/vehicle-exit.type';
@@ -16,8 +19,28 @@ const DEFAULT_EXIT_GATE = 'B1';
 export function useVehicleExit() {
   const [licensePlate, setLicensePlate] = useState('');
   const [session, setSession] = useState<ExitSession | null>(null);
+  const [pricingPolicy, setPricingPolicy] = useState<PricingPolicy | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'BANKING' | 'E_WALLET'>('CASH');
   const [exitImage, setExitImage] = useState<File | null>(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+
+  useEffect(() => {
+    const loadPricingPolicy = async () => {
+      if (!session?.vehicle?.vehicleType) {
+        setPricingPolicy(null);
+        return;
+      }
+
+      try {
+        const policy = await pricingApi.getActivePolicy(session.vehicle.vehicleType);
+        setPricingPolicy(policy);
+      } catch {
+        setPricingPolicy(null);
+      }
+    };
+
+    loadPricingPolicy();
+  }, [session?.vehicle?.vehicleType]);
 
   const searchSessionByPlate = async (plateValue: string) => {
     const plate = normalizePlate(plateValue);
@@ -43,6 +66,7 @@ export function useVehicleExit() {
       const matchedVehicle = vehicles.find((item) => normalizePlate(item.licensePlate) === plate);
 
       setSession(null);
+      setPricingPolicy(null);
 
       if (matchedVehicle) {
         toast.warning('Vehicle exists but has no active parking session');
@@ -79,12 +103,19 @@ export function useVehicleExit() {
 
     try {
       setIsCheckingOut(true);
-      await vehicleExitApi.checkout({ id: session.id, exitGate: DEFAULT_EXIT_GATE, image: exitImage });
+      await vehicleExitApi.checkout({
+        id: session.id,
+        exitGate: DEFAULT_EXIT_GATE,
+        image: exitImage,
+        paymentMethod,
+      });
 
-      toast.success('Vehicle checked out successfully');
+      toast.success('Vehicle checked out and payment recorded successfully');
       setSession(null);
       setLicensePlate('');
       setExitImage(null);
+      setPricingPolicy(null);
+      setPaymentMethod('CASH');
     } catch (error) {
       const message = axios.isAxiosError(error)
         ? error.response?.data?.message || 'Failed to check out vehicle'
@@ -100,6 +131,9 @@ export function useVehicleExit() {
     licensePlate,
     setLicensePlate,
     session,
+    pricingPolicy,
+    paymentMethod,
+    setPaymentMethod,
     setExitImage,
     isCheckingOut,
     handlePlateDetected,
@@ -107,5 +141,3 @@ export function useVehicleExit() {
     handleCheckout,
   };
 }
-
-

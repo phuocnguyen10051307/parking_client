@@ -54,6 +54,7 @@ const formatFloorLabel = (floorNumber: number) =>
   floorNumber < 0 ? `Basement ${Math.abs(floorNumber)}` : `Level ${floorNumber}`;
 const isManagedZone = (zone: Zone): zone is ManagedZone =>
   typeof zone.floor === 'object' && zone.floor !== null;
+const getDefaultZoneId = (zones: ManagedZone[]) => zones[0]?.id ?? '';
 
 export default function SlotsPage() {
   const [zones, setZones] = useState<Zone[]>([]);
@@ -78,9 +79,10 @@ export default function SlotsPage() {
       ]);
       setZones(zonesData);
       setSlots(slotsData);
+      const availableZones = zonesData.filter(isManagedZone);
       setForm((current) => ({
         ...current,
-        zoneId: current.zoneId || zonesData.filter(isManagedZone)[0]?.id || '',
+        zoneId: current.zoneId || getDefaultZoneId(availableZones),
       }));
     } catch (error) {
       toast.error(getErrorMessage(error, 'Failed to load slots'));
@@ -101,7 +103,7 @@ export default function SlotsPage() {
     setEditingId(null);
     setForm({
       ...defaultForm,
-      zoneId: managedZones[0]?.id || '',
+      zoneId: getDefaultZoneId(managedZones),
     });
   };
 
@@ -180,7 +182,7 @@ export default function SlotsPage() {
               </p>
               <h1 className="mt-2 text-3xl font-semibold text-slate-900">Manage slots</h1>
               <p className="mt-2 text-sm text-slate-500">
-                Slot vehicle type follows the selected zone&apos;s floor assignment.
+                Create slots for any zone. Vehicle type is taken from the selected zone.
               </p>
             </div>
             <div className="rounded-2xl bg-sky-50 p-3 text-sky-700">
@@ -218,7 +220,7 @@ export default function SlotsPage() {
                   onChange={(event) =>
                     setForm((current) => ({ ...current, slotCode: event.target.value }))
                   }
-                  placeholder="M-A1-001"
+                  placeholder="C-A1-001"
                 />
               </FieldContent>
             </Field>
@@ -376,3 +378,8 @@ export default function SlotsPage() {
     </DashboardLayout>
   );
 }
+
+
+
+
+
