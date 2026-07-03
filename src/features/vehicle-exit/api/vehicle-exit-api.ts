@@ -1,10 +1,9 @@
 import api from '@/lib/api';
 
-import type { ExitVehicle } from '../types/vehicle-exit.type';
+import type { ExitSession, ExitVehicle } from '../types/vehicle-exit.type';
 
 export const vehicleExitApi = {
-  // Lấy danh sách session đang active
-  getActiveSessions: async () => {
+  getActiveSessions: async (): Promise<ExitSession[]> => {
     const res = await api.get('/parking-sessions', {
       params: {
         status: 'ACTIVE',
@@ -22,15 +21,16 @@ export const vehicleExitApi = {
     return res.data.data;
   },
 
-  checkout: async (payload: { id: string; exitGate: string; image: File }) => {
+  checkout: async (payload: { id: string; exitGate: string; image: File; paymentMethod: 'CASH' | 'BANKING' | 'E_WALLET' }) => {
     const formData = new FormData();
 
     formData.append('id', payload.id);
     formData.append('exitGate', payload.exitGate);
+    formData.append('paymentMethod', payload.paymentMethod);
     formData.append('image', payload.image);
 
     const res = await api.post(`/parking-sessions/${payload.id}/check-out`, formData);
 
-    return res.data.data;
+    return res.data.data as ExitSession;
   },
 };

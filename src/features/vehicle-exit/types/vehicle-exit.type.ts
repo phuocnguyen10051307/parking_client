@@ -11,6 +11,15 @@ export type ExitSlot = {
   slotCode: string;
 };
 
+export type ExitPayment = {
+  id: string;
+  amount: number;
+  method: 'CASH' | 'BANKING' | 'E_WALLET';
+  status: 'PENDING' | 'PAID' | 'FAILED';
+  paidAt?: string | null;
+  createdAt: string;
+};
+
 export type ExitSession = {
   id: string;
   vehicleId: string;
@@ -25,4 +34,5 @@ export type ExitSession = {
   totalFee: number | null;
   vehicle: ExitVehicle;
   slot: ExitSlot;
+  payment?: ExitPayment | null;
 };

@@ -1,4 +1,6 @@
 export type SessionStatus = 'ACTIVE' | 'COMPLETED' | 'LOST_TICKET' | 'OVERDUE';
+export type PaymentMethod = 'CASH' | 'BANKING' | 'E_WALLET';
+export type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED';
 
 export type ParkingSession = {
   id: string;
@@ -11,9 +13,17 @@ export type ParkingSession = {
   exitImageUrl?: string | null;
   exitImagePublicId?: string | null;
   status: SessionStatus;
-  totalFee?: string | null;
+  totalFee?: number | null;
   note?: string | null;
   createdAt: string;
+  payment?: {
+    id: string;
+    amount: number;
+    method: PaymentMethod;
+    status: PaymentStatus;
+    paidAt?: string | null;
+    createdAt: string;
+  } | null;
 
   vehicle?: {
     id: string;
