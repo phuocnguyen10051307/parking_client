@@ -33,7 +33,7 @@ export function SearchSessionCard({
             <input
               value={licensePlate}
               onChange={(e) => setLicensePlate(e.target.value)}
-              placeholder="ABC-1234"
+              placeholder="51A-234.44"
               className="w-full rounded-xl bg-slate-100 p-4 text-3xl font-bold tracking-[0.2em]"
             />
 

@@ -2,27 +2,26 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
+import { compactLicensePlate, formatLicensePlate } from '@/lib/license-plate';
 import { pricingApi } from '@/features/pricing/api/pricing-api';
 import type { PricingPolicy } from '@/features/pricing/types/pricing';
 
 import { vehicleExitApi } from '../api/vehicle-exit-api';
 import type { ExitSession } from '../types/vehicle-exit.type';
 
-const normalizePlate = (plate: string) =>
-  plate
-    .trim()
-    .toUpperCase()
-    .replace(/[^A-Z0-9]/g, '');
-
 const DEFAULT_EXIT_GATE = 'B1';
 
 export function useVehicleExit() {
-  const [licensePlate, setLicensePlate] = useState('');
+  const [licensePlate, setLicensePlateState] = useState('');
   const [session, setSession] = useState<ExitSession | null>(null);
   const [pricingPolicy, setPricingPolicy] = useState<PricingPolicy | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'BANKING' | 'E_WALLET'>('CASH');
   const [exitImage, setExitImage] = useState<File | null>(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+
+  const setLicensePlate = (value: string) => {
+    setLicensePlateState(formatLicensePlate(value));
+  };
 
   useEffect(() => {
     const loadPricingPolicy = async () => {
@@ -43,7 +42,7 @@ export function useVehicleExit() {
   }, [session?.vehicle?.vehicleType]);
 
   const searchSessionByPlate = async (plateValue: string) => {
-    const plate = normalizePlate(plateValue);
+    const plate = compactLicensePlate(plateValue);
 
     if (!plate) {
       toast.warning('License plate is required');
@@ -53,7 +52,7 @@ export function useVehicleExit() {
     try {
       const sessions = await vehicleExitApi.getActiveSessions();
       const matchedSession = sessions.find(
-        (item: ExitSession) => normalizePlate(item.vehicle.licensePlate) === plate
+        (item: ExitSession) => compactLicensePlate(item.vehicle.licensePlate) === plate
       );
 
       if (matchedSession) {
@@ -63,7 +62,7 @@ export function useVehicleExit() {
       }
 
       const vehicles = await vehicleExitApi.findVehicleByPlate(plate);
-      const matchedVehicle = vehicles.find((item) => normalizePlate(item.licensePlate) === plate);
+      const matchedVehicle = vehicles.find((item) => compactLicensePlate(item.licensePlate) === plate);
 
       setSession(null);
       setPricingPolicy(null);
@@ -86,8 +85,9 @@ export function useVehicleExit() {
   const handleSearchSession = () => searchSessionByPlate(licensePlate);
 
   const handlePlateDetected = async (plate: string) => {
-    setLicensePlate(plate);
-    await searchSessionByPlate(plate);
+    const formattedPlate = formatLicensePlate(plate);
+    setLicensePlateState(formattedPlate);
+    await searchSessionByPlate(formattedPlate);
   };
 
   const handleCheckout = async () => {
@@ -112,7 +112,7 @@ export function useVehicleExit() {
 
       toast.success('Vehicle checked out and payment recorded successfully');
       setSession(null);
-      setLicensePlate('');
+      setLicensePlateState('');
       setExitImage(null);
       setPricingPolicy(null);
       setPaymentMethod('CASH');
