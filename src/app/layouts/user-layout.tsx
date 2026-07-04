@@ -32,7 +32,11 @@ export function UserLayout() {
         </Link>
 
         <nav className="flex items-center gap-6">
-          <Link to="/user" className="font-medium text-slate-700 transition hover:text-blue-900">
+          <Link to="/user" className="font-medium text-slate-700 hover:text-blue-900">
+            Home
+          </Link>
+
+          <Link to="/user/dashboard" className="font-medium text-slate-700 hover:text-blue-900">
             Dashboard
           </Link>
 
@@ -95,7 +99,7 @@ export function UserLayout() {
         </nav>
       </header>
 
-      <main className="mx-auto max-w-6xl p-8">
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Outlet />
       </main>
     </div>

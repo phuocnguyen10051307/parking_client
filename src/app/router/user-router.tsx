@@ -13,6 +13,7 @@ import CreateFeedbackPage from '@/features/feedback/pages/create-feedback-page';
 import MyParkingSessionsPage from '@/features/parking-sessions/pages/my-parking-sessions-page';
 import MyParkingSessionDetailPage from '@/features/parking-sessions/pages/my-parking-session-detail-page';
 import PublicPricingPage from '@/features/pricing/pages/public-pricing-page';
+import UserHomePage from '@/features/home/pages/home-page';
 import type { UserRole } from '@/types/user-role';
 
 const userAllowedRoles: UserRole[] = ['USER'];
@@ -28,8 +29,9 @@ export function UserRouter() {
       }
     >
       {/** Dashboard là index route của user layout */}
-      <Route index element={<UserDashboardPage />} />
+      <Route index element={<UserHomePage />} />
       {/** Route relative, kế thừa path từ layout cha */}
+      <Route path="dashboard" element={<UserDashboardPage />} />
       <Route path="my-profile" element={<ProfilePage />} />
       <Route path="my-vehicles" element={<MyVehiclesPage />} />
       <Route path="my-reservations" element={<MyReservationsPage />} />
