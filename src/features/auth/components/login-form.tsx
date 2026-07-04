@@ -13,6 +13,7 @@ import { authApi } from '@/features/auth/api/auth-api';
 import { persistAuthSession } from '@/features/auth/utils/auth-session';
 
 import { getDefaultRouteByRole } from '@/app/router/rbac-config';
+import { Eye, EyeOff } from 'lucide-react';
 
 type FormErrors = {
   email?: string;
@@ -27,6 +28,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (field: string, value: string) => {
     setForm((prev) => ({
@@ -112,12 +114,25 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
 
               <Field>
                 <FieldLabel>Password</FieldLabel>
-                <Input
-                  type="password"
-                  placeholder="Enter password"
-                  value={form.password}
-                  onChange={(e) => handleChange('password', e.target.value)}
-                />
+
+                <div className="relative">
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Enter password"
+                    value={form.password}
+                    onChange={(e) => handleChange('password', e.target.value)}
+                    className="pr-10"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+
                 {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
               </Field>
 
@@ -145,5 +160,3 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
     </div>
   );
 }
-
-

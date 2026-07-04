@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import { Eye, EyeOff } from 'lucide-react';
 
 const getApiErrorMessage = (error: unknown, fallback: string) => {
   if (axios.isAxiosError(error)) {
@@ -43,6 +44,8 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (field: string, value: string) => {
     setForm((prev) => ({
@@ -235,25 +238,53 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
 
               <Field>
                 <FieldLabel>Password</FieldLabel>
-                <Input
-                  type="password"
-                  placeholder="Enter password"
-                  value={form.password}
-                  disabled={otpSent}
-                  onChange={(e) => handleChange('password', e.target.value)}
-                />
+
+                <div className="relative">
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Enter password"
+                    value={form.password}
+                    disabled={otpSent}
+                    onChange={(e) => handleChange('password', e.target.value)}
+                    className="pr-10"
+                  />
+
+                  <button
+                    type="button"
+                    disabled={otpSent}
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+
                 {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
               </Field>
 
               <Field>
                 <FieldLabel>Confirm Password</FieldLabel>
-                <Input
-                  type="password"
-                  placeholder="Enter confirm password"
-                  value={form.confirmPassword}
-                  disabled={otpSent}
-                  onChange={(e) => handleChange('confirmPassword', e.target.value)}
-                />
+
+                <div className="relative">
+                  <Input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    placeholder="Enter confirm password"
+                    value={form.confirmPassword}
+                    disabled={otpSent}
+                    onChange={(e) => handleChange('confirmPassword', e.target.value)}
+                    className="pr-10"
+                  />
+
+                  <button
+                    type="button"
+                    disabled={otpSent}
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
+                  >
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+
                 {errors.confirmPassword && (
                   <p className="text-sm text-red-500">{errors.confirmPassword}</p>
                 )}
@@ -275,16 +306,32 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
 
               <Field>
                 <Button type="submit" disabled={loading || resending}>
-                  {loading ? (otpSent ? 'Verifying...' : 'Sending...') : otpSent ? 'Verify OTP' : 'Send OTP'}
+                  {loading
+                    ? otpSent
+                      ? 'Verifying...'
+                      : 'Sending...'
+                    : otpSent
+                      ? 'Verify OTP'
+                      : 'Send OTP'}
                 </Button>
               </Field>
 
               {otpSent && (
                 <div className="flex items-center justify-center gap-2 text-sm">
-                  <Button type="button" variant="link" disabled={loading || resending} onClick={handleResendOtp}>
+                  <Button
+                    type="button"
+                    variant="link"
+                    disabled={loading || resending}
+                    onClick={handleResendOtp}
+                  >
                     {resending ? 'Sending...' : 'Resend OTP'}
                   </Button>
-                  <Button type="button" variant="link" disabled={loading || resending} onClick={handleEditInfo}>
+                  <Button
+                    type="button"
+                    variant="link"
+                    disabled={loading || resending}
+                    onClick={handleEditInfo}
+                  >
                     Edit information
                   </Button>
                 </div>
