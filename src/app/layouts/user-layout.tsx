@@ -71,6 +71,13 @@ export function UserLayout() {
             Feedbacks
           </Link>
 
+          <Link
+            to="/user/pricing"
+            className="font-medium text-slate-700 transition hover:text-blue-900"
+          >
+            Pricing
+          </Link>
+
           <div className="flex flex-col text-right">
             {/* Tên ở trên */}
             <span className="font-medium text-slate-800">{user?.displayName || 'Customer'}</span>

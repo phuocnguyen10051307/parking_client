@@ -62,6 +62,7 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
   { path: '/my-sessions', allowedRoles: ['USER'] },
   { path: '/my-feedbacks', allowedRoles: ['USER'] },
   { path: '/create-feedback', allowedRoles: ['USER'] },
+  { path: '/user/pricing', allowedRoles: ['USER'] },
 ];
 
 export const SIDEBAR_MENUS: SidebarMenuItem[] = [

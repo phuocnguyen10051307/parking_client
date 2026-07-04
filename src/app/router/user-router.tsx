@@ -12,6 +12,7 @@ import MyFeedbackPage from '@/features/feedback/pages/my-feedback-page';
 import CreateFeedbackPage from '@/features/feedback/pages/create-feedback-page';
 import MyParkingSessionsPage from '@/features/parking-sessions/pages/my-parking-sessions-page';
 import MyParkingSessionDetailPage from '@/features/parking-sessions/pages/my-parking-session-detail-page';
+import PublicPricingPage from '@/features/pricing/pages/public-pricing-page';
 import type { UserRole } from '@/types/user-role';
 
 const userAllowedRoles: UserRole[] = ['USER'];
@@ -38,6 +39,7 @@ export function UserRouter() {
       <Route path="create-feedback" element={<CreateFeedbackPage />} />
       <Route path="my-sessions" element={<MyParkingSessionsPage />} />
       <Route path="my-sessions/:id" element={<MyParkingSessionDetailPage />} />
+      <Route path="pricing" element={<PublicPricingPage />} />
     </Route>
   );
 }
