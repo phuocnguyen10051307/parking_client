@@ -1,11 +1,13 @@
-import { Route } from 'react-router-dom';
+﻿import { Route } from 'react-router-dom';
 
+import { DashboardLayout } from '@/app/layouts/dashboard-layout';
 import { ProtectedRoute } from '@/app/router/protected-route';
 import BuildingsPage from '@/features/buildings/pages/buildings-page';
 import DashboardPage from '@/features/dashboard/pages/dashboard-page';
 import FeedbackDetailPage from '@/features/feedback/pages/feedback-detail-page';
 import FeedbackManagementPage from '@/features/feedback/pages/feedback-management-page';
 import FloorsPage from '@/features/floors/pages/floors-page';
+import ParkingMapPage from '@/features/parking-map/pages/parking-map-page';
 import ParkingSessionDetailPage from '@/features/parking-sessions/pages/parking-session-detail-page';
 import ParkingSessionsManagementPage from '@/features/parking-sessions/pages/parking-sessions-management-page';
 import PricingPage from '@/features/pricing/pages/pricing-page';
@@ -34,6 +36,16 @@ export function AdminRouter() {
         element={
           <ProtectedRoute allowedRoles={getAllowedRoles('/')}>
             <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/parking-map"
+        element={
+          <ProtectedRoute allowedRoles={getAllowedRoles('/parking-map')}>
+            <DashboardLayout>
+              <ParkingMapPage />
+            </DashboardLayout>
           </ProtectedRoute>
         }
       />
@@ -184,3 +196,5 @@ export function AdminRouter() {
     </>
   );
 }
+
+

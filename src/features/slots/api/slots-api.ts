@@ -16,11 +16,9 @@ export const slotsApi = {
     return res.data.data;
   },
 
-  getAvailableSlots: async (vehicleType?: string) => {
+  getAvailableSlots: async (params?: { vehicleType?: string; startTime?: string; endTime?: string }) => {
     const res = await api.get('/slots/available', {
-      params: {
-        vehicleType,
-      },
+      params,
     });
 
     return res.data.data;

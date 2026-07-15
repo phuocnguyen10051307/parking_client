@@ -219,7 +219,7 @@ export default function MyVehiclesPage() {
                   <p className="font-semibold">{formatLicensePlate(vehicle.licensePlate)}</p>
 
                   <p className="text-sm text-slate-500">
-                    {vehicle.vehicleType} • {vehicle.brand || 'N/A'} • {vehicle.color || 'N/A'}
+                    {vehicle.vehicleType} â€¢ {vehicle.brand || 'N/A'} â€¢ {vehicle.color || 'N/A'}
                   </p>
                 </div>
 

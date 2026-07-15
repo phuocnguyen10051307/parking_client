@@ -10,6 +10,7 @@ import UserDashboardPage from '@/features/user-dashboard/pages/user-dashboard-pa
 import MyVehiclesPage from '@/features/vehicles/pages/my-vehicles-page';
 import MyFeedbackPage from '@/features/feedback/pages/my-feedback-page';
 import CreateFeedbackPage from '@/features/feedback/pages/create-feedback-page';
+import ParkingMapPage from '@/features/parking-map/pages/parking-map-page';
 import MyParkingSessionsPage from '@/features/parking-sessions/pages/my-parking-sessions-page';
 import MyParkingSessionDetailPage from '@/features/parking-sessions/pages/my-parking-session-detail-page';
 import PublicPricingPage from '@/features/pricing/pages/public-pricing-page';
@@ -28,14 +29,15 @@ export function UserRouter() {
         </ProtectedRoute>
       }
     >
-      {/** Dashboard là index route của user layout */}
+      {/** Dashboard la index route cua user layout */}
       <Route index element={<UserHomePage />} />
-      {/** Route relative, kế thừa path từ layout cha */}
+      {/** Route relative, ke thua path tu layout cha */}
       <Route path="dashboard" element={<UserDashboardPage />} />
       <Route path="my-profile" element={<ProfilePage />} />
       <Route path="my-vehicles" element={<MyVehiclesPage />} />
       <Route path="my-reservations" element={<MyReservationsPage />} />
       <Route path="my-reservations/:id" element={<MyReservationDetailPage />} />
+      <Route path="parking-map" element={<ParkingMapPage />} />
       <Route path="create-reservation" element={<CreateReservationPage />} />
       <Route path="my-feedbacks" element={<MyFeedbackPage />} />
       <Route path="create-feedback" element={<CreateFeedbackPage />} />

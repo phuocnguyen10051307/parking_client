@@ -1,4 +1,4 @@
-import { Link, Outlet, useNavigate } from 'react-router-dom';
+﻿import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import { authApi } from '@/features/auth/api/auth-api';
@@ -62,6 +62,12 @@ export function UserLayout() {
           </Link>
 
           <Link
+            to="/user/parking-map"
+            className="font-medium text-slate-700 transition hover:text-blue-900"
+          >
+            Parking Map
+          </Link>
+          <Link
             to="/user/my-sessions"
             className="font-medium text-slate-700 transition hover:text-blue-900"
           >
@@ -83,10 +89,10 @@ export function UserLayout() {
           </Link>
 
           <div className="flex flex-col text-right">
-            {/* Tên ở trên */}
+            {/* TÃªn á»Ÿ trÃªn */}
             <span className="font-medium text-slate-800">{user?.displayName || 'Customer'}</span>
 
-            {/* Email ở dưới */}
+            {/* Email á»Ÿ dÆ°á»›i */}
             <span className="text-xs text-slate-500">{user?.email}</span>
           </div>
 
@@ -105,3 +111,7 @@ export function UserLayout() {
     </div>
   );
 }
+
+
+
+

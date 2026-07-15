@@ -1,4 +1,4 @@
-export type EntryVehicle = {
+﻿export type EntryVehicle = {
   id: string;
   licensePlate: string;
   vehicleType: string;
@@ -12,9 +12,28 @@ export type EntrySlot = {
   vehicleType: string;
   status: string;
   zone?: {
+    id?: string;
     name: string;
     floor?: {
+      id?: string;
       floorNumber: number;
+      building?: {
+        id: string;
+        name: string;
+      };
     };
   };
 };
+
+export type EntryFloorOption = {
+  id: string;
+  label: string;
+  floorNumber: number;
+};
+
+export type EntryZoneOption = {
+  id: string;
+  label: string;
+  floorId: string;
+};
+

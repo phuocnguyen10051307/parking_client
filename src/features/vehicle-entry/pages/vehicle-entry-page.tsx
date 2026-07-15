@@ -7,7 +7,6 @@ import { VehicleEntryActions } from '../components/vehicle-entry-actions';
 import { useVehicleEntry } from '../hooks/use-vehicle-entry';
 
 export default function VehicleEntryPage() {
-  // Hook quản lý toàn bộ flow check-in
   const {
     licensePlate,
     setLicensePlate,
@@ -16,18 +15,21 @@ export default function VehicleEntryPage() {
     setEntryImage,
     isCheckingIn,
     vehicle,
+    floorOptions,
+    zoneOptions,
+    selectedFloorId,
+    setSelectedFloorId,
+    selectedZoneId,
+    setSelectedZoneId,
     slots,
     selectedSlot,
     setSelectedSlot,
-    handleSearchVehicle,
-    loadAvailableSlots,
     handleCheckIn,
   } = useVehicleEntry();
 
   return (
     <DashboardLayout>
       <div className="space-y-8">
-        {/* Header */}
         <div>
           <div className="text-3xl font-semibold text-blue-900">New Vehicle Entry</div>
 
@@ -36,9 +38,7 @@ export default function VehicleEntryPage() {
           </p>
         </div>
 
-        {/* Main content */}
         <div className="grid gap-8 lg:grid-cols-2">
-          {/* Form nhập thông tin xe */}
           <VehicleEntryForm
             licensePlate={licensePlate}
             setLicensePlate={setLicensePlate}
@@ -46,16 +46,24 @@ export default function VehicleEntryPage() {
             entryGate={entryGate}
             vehicle={vehicle}
             onImageCaptured={setEntryImage}
-            onSearch={handleSearchVehicle}
-            onLoadSlots={loadAvailableSlots}
           />
 
           <div className="space-y-8">
-            {/* Slot được recommend */}
             <RecommendedSlotCard selectedSlot={selectedSlot} />
 
-            {/* Danh sách slot */}
             <ZoneVisualization
+              floorOptions={floorOptions}
+              zoneOptions={zoneOptions}
+              selectedFloorId={selectedFloorId}
+              onSelectFloor={(floorId) => {
+                setSelectedFloorId(floorId);
+                setSelectedSlot(null);
+              }}
+              selectedZoneId={selectedZoneId}
+              onSelectZone={(zoneId) => {
+                setSelectedZoneId(zoneId);
+                setSelectedSlot(null);
+              }}
               slots={slots}
               selectedSlot={selectedSlot}
               onSelectSlot={setSelectedSlot}
@@ -63,7 +71,6 @@ export default function VehicleEntryPage() {
           </div>
         </div>
 
-        {/* Action cuối */}
         <VehicleEntryActions
           selectedSlot={selectedSlot}
           isCheckingIn={isCheckingIn}
@@ -73,4 +80,3 @@ export default function VehicleEntryPage() {
     </DashboardLayout>
   );
 }
-

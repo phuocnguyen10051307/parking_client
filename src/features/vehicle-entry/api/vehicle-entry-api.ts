@@ -6,6 +6,7 @@ type CheckInByPlatePayload = {
   image: File;
   slotId: string;
   vehicleType: string;
+  vehicleId?: string;
   entryGate?: string;
 };
 
@@ -39,6 +40,10 @@ export const vehicleEntryApi = {
     formData.append('image', payload.image);
     formData.append('slotId', payload.slotId);
     formData.append('vehicleType', payload.vehicleType);
+
+    if (payload.vehicleId) {
+      formData.append('vehicleId', payload.vehicleId);
+    }
 
     if (payload.entryGate) {
       formData.append('entryGate', payload.entryGate);

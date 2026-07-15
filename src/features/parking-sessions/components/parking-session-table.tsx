@@ -107,7 +107,7 @@ export function ParkingSessionTable({ sessions, loading, error, onRefresh }: Par
               <tr key={session.id} className="text-sm text-slate-700">
                 <td className="px-6 py-4">
                   <div className="font-semibold text-slate-950">{session.vehicle?.licensePlate || '-'}</div>
-                  <div className="mt-1 text-xs text-slate-500">{session.vehicle?.color || session.vehicle?.brand || 'Unregistered details'}</div>
+                  <div className="mt-1 text-xs text-slate-500">{session.vehicle?.color || session.vehicle?.brand || 'No brand/color details'}</div>
                 </td>
 
                 <td className="px-6 py-4">

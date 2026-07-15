@@ -1,4 +1,4 @@
-import { Car, Search } from 'lucide-react';
+import { Car } from 'lucide-react';
 
 import { LicensePlateCamera } from './license-plate-camera';
 
@@ -10,8 +10,6 @@ type Props = {
   vehicleType: string;
   entryGate: string;
   vehicle: EntryVehicle | null;
-  onSearch: () => void;
-  onLoadSlots: () => void;
   onImageCaptured: (file: File | null) => void;
 };
 
@@ -21,8 +19,6 @@ export function VehicleEntryForm({
   vehicleType,
   entryGate,
   vehicle,
-  onSearch,
-  onLoadSlots,
   onImageCaptured,
 }: Props) {
   return (
@@ -38,18 +34,12 @@ export function VehicleEntryForm({
         <div>
           <label className="mb-2 block text-sm text-slate-500">License Plate Number</label>
 
-          <div className="flex gap-3">
-            <input
-              value={licensePlate}
-              onChange={(e) => setLicensePlate(e.target.value)}
-              placeholder="51A-234.44"
-              className="w-full rounded-xl bg-slate-100 p-4 text-3xl font-bold tracking-[0.2em]"
-            />
-
-            <button onClick={onSearch} className="rounded-xl bg-blue-900 px-4 text-white">
-              <Search size={20} />
-            </button>
-          </div>
+          <input
+            value={licensePlate}
+            onChange={(e) => setLicensePlate(e.target.value)}
+            placeholder="51A-234.44"
+            className="w-full rounded-xl bg-slate-100 p-4 text-3xl font-bold tracking-[0.2em]"
+          />
 
           <p className="mt-2 text-sm italic text-slate-400">
             Review the detected plate and edit it before confirming check-in.
@@ -88,17 +78,14 @@ export function VehicleEntryForm({
             </div>
           ) : (
             <p className="mt-1 text-sm text-slate-600">
-              This vehicle is not in the system. New guest profile will be created.
+              If this plate matches a registered vehicle, its details will appear automatically.
             </p>
           )}
         </div>
 
-        <button
-          onClick={onLoadSlots}
-          className="w-full rounded-xl bg-emerald-600 py-3 font-medium text-white"
-        >
-          Load Available Slots
-        </button>
+        <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-900">
+          Available slots are loaded automatically after the entry image is captured.
+        </div>
       </div>
     </section>
   );

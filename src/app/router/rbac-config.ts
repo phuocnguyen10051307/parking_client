@@ -1,4 +1,4 @@
-import {
+﻿import {
   Building2,
   CarFront,
   Clock3,
@@ -37,6 +37,7 @@ const ADMIN_ONLY_ROLES: UserRole[] = ['ADMIN'];
 
 export const ROUTE_PERMISSIONS: RoutePermission[] = [
   { path: '/', allowedRoles: OPERATION_ROLES },
+  { path: '/parking-map', allowedRoles: OPERATION_ROLES },
   { path: '/vehicle-entry', allowedRoles: STAFF_ROLES },
   { path: '/vehicle-exit', allowedRoles: STAFF_ROLES },
   { path: '/parking-sessions', allowedRoles: OPERATION_ROLES },
@@ -67,6 +68,13 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
 
 export const SIDEBAR_MENUS: SidebarMenuItem[] = [
   { label: 'Dashboard', path: '/', icon: LayoutDashboard, allowedRoles: OPERATION_ROLES },
+  {
+    label: 'Parking Map',
+    path: '/parking-map',
+    icon: Map,
+    allowedRoles: OPERATION_ROLES,
+    activeMatchers: ['/parking-map'],
+  },
   { label: 'Vehicle Entry', path: '/vehicle-entry', icon: CarFront, allowedRoles: STAFF_ROLES },
   { label: 'Vehicle Exit', path: '/vehicle-exit', icon: LogOut, allowedRoles: STAFF_ROLES },
   {
@@ -158,3 +166,4 @@ export function getRoleLabel(role: string | null | undefined) {
       return 'User';
   }
 }
+
