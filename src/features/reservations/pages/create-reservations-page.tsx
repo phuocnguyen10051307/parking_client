@@ -19,12 +19,13 @@ type Slot = {
 };
 
 const RESERVATION_WINDOW_DAYS = 5;
-const MIN_END_OFFSET_MINUTES = 30;
+const RESERVATION_DURATION_MINUTES = 60;
 
 const toDateTimeLocalValue = (date: Date) => {
   const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
   return localDate.toISOString().slice(0, 16);
 };
+
 const addDays = (date: Date, days: number) => new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
 const addMinutes = (date: Date, minutes: number) => new Date(date.getTime() + minutes * 60 * 1000);
 
@@ -42,16 +43,29 @@ export default function CreateReservationPage() {
   const now = useMemo(() => new Date(), []);
   const minDateTime = useMemo(() => toDateTimeLocalValue(now), [now]);
   const maxDateTime = useMemo(() => toDateTimeLocalValue(addDays(now, RESERVATION_WINDOW_DAYS)), [now]);
-  const minEndTime = useMemo(() => {
+
+  const formattedEndTime = useMemo(() => {
+    if (!endTime) {
+      return 'Automatically set to 1 hour after your selected arrival time.';
+    }
+
+    return new Date(endTime).toLocaleString();
+  }, [endTime]);
+
+  useEffect(() => {
     if (!startTime) {
-      return minDateTime;
+      setEndTime('');
+      return;
     }
 
     const parsedStart = new Date(startTime);
-    return Number.isNaN(parsedStart.getTime())
-      ? minDateTime
-      : toDateTimeLocalValue(addMinutes(parsedStart, MIN_END_OFFSET_MINUTES));
-  }, [minDateTime, startTime]);
+    if (Number.isNaN(parsedStart.getTime())) {
+      setEndTime('');
+      return;
+    }
+
+    setEndTime(toDateTimeLocalValue(addMinutes(parsedStart, RESERVATION_DURATION_MINUTES)));
+  }, [startTime]);
 
   useEffect(() => {
     const fetchVehicles = async () => {
@@ -115,7 +129,7 @@ export default function CreateReservationPage() {
         <p className="mt-2 text-slate-500">Reserve an empty parking slot within the next 5 days.</p>
       </div>
 
-      <div className="space-y-4 rounded-2xl border bg-white p-6 shadow-sm">
+      <div className="space-y-5 rounded-2xl border bg-white p-6 shadow-sm">
         <select
           value={vehicleId}
           onChange={(e) => setVehicleId(e.target.value)}
@@ -129,23 +143,24 @@ export default function CreateReservationPage() {
           ))}
         </select>
 
-        <input
-          type="datetime-local"
-          value={startTime}
-          min={minDateTime}
-          max={maxDateTime}
-          onChange={(e) => setStartTime(e.target.value)}
-          className="w-full rounded-xl border p-3"
-        />
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-slate-700">Arrival time</label>
+          <input
+            type="datetime-local"
+            value={startTime}
+            min={minDateTime}
+            max={maxDateTime}
+            onChange={(e) => setStartTime(e.target.value)}
+            className="w-full rounded-xl border p-3"
+          />
+        </div>
 
-        <input
-          type="datetime-local"
-          value={endTime}
-          min={minEndTime}
-          max={maxDateTime}
-          onChange={(e) => setEndTime(e.target.value)}
-          className="w-full rounded-xl border p-3"
-        />
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          <p className="font-semibold">Reservation hold window</p>
+          <p className="mt-1">Your reservation will automatically end 1 hour after the selected arrival time.</p>
+          <p className="mt-1">Expected end time: {formattedEndTime}</p>
+          <p className="mt-2 text-amber-800">If you arrive more than 1 hour late, your reservation may be lost.</p>
+        </div>
 
         <select
           value={slotId}
