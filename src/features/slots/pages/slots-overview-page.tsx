@@ -47,7 +47,7 @@ export default function SlotsOverviewPage() {
           return (
             <Link
               key={floor.id}
-              to={`/slots/${floor.id}`}
+              to="/slots"
               className="rounded-2xl bg-white p-6 shadow-sm transition hover:shadow-md"
             >
               {/* Tên tầng */}
@@ -85,3 +85,4 @@ export default function SlotsOverviewPage() {
     </DashboardLayout>
   );
 }
+

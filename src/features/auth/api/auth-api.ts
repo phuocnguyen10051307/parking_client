@@ -1,5 +1,7 @@
-// Auth api
 import api from '@/lib/api';
+
+import { normalizeAuthUser } from '../utils/auth-util';
+import type { AuthSession, MeResponse, SigninResponse } from '../types/auth.types';
 
 export type SigninRequest = {
   email: string;
@@ -7,6 +9,11 @@ export type SigninRequest = {
 };
 
 export type SignupRequest = {
+  email: string;
+  otpCode: string;
+};
+
+export type RequestSignupOtpRequest = {
   fullName: string;
   email: string;
   password: string;
@@ -14,8 +21,17 @@ export type SignupRequest = {
 };
 
 export const authApi = {
-  signin: async (data: SigninRequest) => {
-    const res = await api.post('/auth/signin', data);
+  signin: async (data: SigninRequest): Promise<AuthSession> => {
+    const res = await api.post<SigninResponse>('/auth/signin', data);
+    const session = res.data.data;
+
+    return {
+      user: normalizeAuthUser(session.user),
+    };
+  },
+
+  requestSignupOtp: async (data: RequestSignupOtpRequest) => {
+    const res = await api.post('/auth/signup/request-otp', data);
     return res.data;
   },
 
@@ -25,8 +41,8 @@ export const authApi = {
   },
 
   me: async () => {
-    const res = await api.get('/auth/me');
-    return res.data;
+    const res = await api.get<MeResponse>('/auth/me');
+    return normalizeAuthUser(res.data.user);
   },
 
   signout: async () => {
@@ -35,9 +51,15 @@ export const authApi = {
   },
 
   refreshToken: async () => {
-    const res = await api.post('/auth/refresh-token', {}, {
-      withCredentials: true,
-    });
+    const res = await api.post(
+      '/auth/refresh-token',
+      {},
+      {
+        withCredentials: true,
+      }
+    );
     return res.data;
   },
 };
+
+

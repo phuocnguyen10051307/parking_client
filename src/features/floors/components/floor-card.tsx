@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { Pencil, Trash2 } from 'lucide-react';
 
 import type { Floor } from '../types/floor';
 
@@ -8,44 +7,31 @@ type Props = {
 };
 
 export function FloorCard({ floor }: Props) {
-  // Tính phần trăm đã sử dụng
-  const occupiedPercent = Math.round((floor.occupiedSlots / floor.totalSlots) * 100);
-
-  // Tính số slot còn trống
-  const availableSlots = floor.totalSlots - floor.occupiedSlots;
+  const totalSlots = floor.totalSlots ?? 0;
+  const occupiedSlots = floor.occupiedSlots ?? 0;
+  const availability = floor.availability ?? 0;
+  const occupiedPercent = totalSlots > 0 ? Math.round((occupiedSlots / totalSlots) * 100) : 0;
+  const availableSlots = Math.max(totalSlots - occupiedSlots, 0);
+  const status = floor.status ?? 'Operational';
 
   return (
     <div className="rounded-3xl border bg-white p-6 shadow-sm">
-      {/* Header */}
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <h3 className="text-xl font-semibold text-blue-900">{floor.name}</h3>
-
-          <p className="text-sm text-slate-500">{floor.description}</p>
-        </div>
-
-        {/* Nút chỉnh sửa / xoá */}
-        <div className="flex gap-2">
-          <button>
-            <Pencil size={18} />
-          </button>
-
-          <button>
-            <Trash2 size={18} className="text-red-500" />
-          </button>
+          <h3 className="text-xl font-semibold text-blue-900">{floor.name ?? 'Unnamed floor'}</h3>
+          <p className="text-sm text-slate-500">{floor.description ?? 'No description'}</p>
         </div>
       </div>
 
-      {/* Thống kê */}
       <div className="space-y-3">
         <div className="flex justify-between">
           <span>Total Slots</span>
-          <span className="font-semibold">{floor.totalSlots}</span>
+          <span className="font-semibold">{totalSlots}</span>
         </div>
 
         <div className="flex justify-between">
           <span>Occupied</span>
-          <span className="font-semibold text-red-500">{floor.occupiedSlots}</span>
+          <span className="font-semibold text-red-500">{occupiedSlots}</span>
         </div>
 
         <div className="flex justify-between">
@@ -55,43 +41,39 @@ export function FloorCard({ floor }: Props) {
 
         <div className="flex justify-between">
           <span>Availability</span>
-          <span className="font-semibold text-green-600">{floor.availability}%</span>
+          <span className="font-semibold text-green-600">{availability}%</span>
         </div>
       </div>
 
-      {/* Progress bar */}
       <div className="mt-5">
         <div className="h-3 overflow-hidden rounded-full bg-slate-200">
           <div
             className="h-full rounded-full bg-blue-900"
-            style={{
-              width: `${occupiedPercent}%`,
-            }}
+            style={{ width: `${occupiedPercent}%` }}
           />
         </div>
 
         <p className="mt-2 text-sm text-slate-500">Occupancy {occupiedPercent}%</p>
       </div>
 
-      {/* Footer */}
       <div className="mt-5 flex items-center justify-between border-t pt-4">
         <span
           className={`rounded-full px-3 py-1 text-xs font-medium ${
-            floor.status === 'Operational'
+            status === 'Operational'
               ? 'bg-green-100 text-green-700'
-              : floor.status === 'Near Capacity'
+              : status === 'Near Capacity'
                 ? 'bg-yellow-100 text-yellow-700'
                 : 'bg-slate-200 text-slate-700'
           }`}
         >
-          {floor.status}
+          {status}
         </span>
 
-        {/* Route động theo floor.id */}
-        <Link to={`/slots/${floor.id}`} className="font-medium text-blue-900 hover:underline">
+        <Link to="/slots" className="font-medium text-blue-900 hover:underline">
           View Slots
         </Link>
       </div>
     </div>
   );
 }
+

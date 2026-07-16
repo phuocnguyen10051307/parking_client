@@ -1,4 +1,4 @@
-import { Car, Bike, Truck, CheckCircle2, Clock3, CalendarClock, Wrench } from 'lucide-react';
+import { Bike, CalendarClock, Car, CheckCircle2, Clock3, Truck, Wrench } from 'lucide-react';
 
 import type { Slot } from '../types/slot.type';
 
@@ -48,11 +48,11 @@ export function SlotCard({ slot, onClick }: Props) {
 
       {/* Nội dung */}
       <div className="text-center">
-        {slot.status === 'occupied' ? (
+        {slot.status === 'occupied' && slot.plate ? (
           <>
             <p className="font-semibold text-slate-900">{slot.plate}</p>
 
-            <p className="text-xs text-slate-500">Active: {slot.duration}</p>
+            <p className="text-xs text-slate-500">Active: {slot.duration ?? '-'}</p>
           </>
         ) : (
           <p className="text-xs font-semibold uppercase text-slate-500">{slot.status}</p>
