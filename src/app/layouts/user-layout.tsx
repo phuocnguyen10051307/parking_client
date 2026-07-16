@@ -62,6 +62,13 @@ export function UserLayout() {
           </Link>
 
           <Link
+            to="/user/my-monthly-subscriptions"
+            className="font-medium text-slate-700 transition hover:text-blue-900"
+          >
+            Monthly Passes
+          </Link>
+
+          <Link
             to="/user/parking-map"
             className="font-medium text-slate-700 transition hover:text-blue-900"
           >

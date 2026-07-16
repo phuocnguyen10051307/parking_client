@@ -7,6 +7,8 @@ import DashboardPage from '@/features/dashboard/pages/dashboard-page';
 import FeedbackDetailPage from '@/features/feedback/pages/feedback-detail-page';
 import FeedbackManagementPage from '@/features/feedback/pages/feedback-management-page';
 import FloorsPage from '@/features/floors/pages/floors-page';
+import MonthlySubscriptionDetailPage from '@/features/monthly-subscriptions/pages/monthly-subscription-detail-page';
+import MonthlySubscriptionsManagementPage from '@/features/monthly-subscriptions/pages/monthly-subscriptions-management-page';
 import ParkingMapPage from '@/features/parking-map/pages/parking-map-page';
 import ParkingSessionDetailPage from '@/features/parking-sessions/pages/parking-session-detail-page';
 import ParkingSessionsManagementPage from '@/features/parking-sessions/pages/parking-sessions-management-page';
@@ -94,6 +96,24 @@ export function AdminRouter() {
         element={
           <ProtectedRoute allowedRoles={getAllowedRoles('/reservations')}>
             <ReservationDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/monthly-subscriptions"
+        element={
+          <ProtectedRoute allowedRoles={getAllowedRoles('/monthly-subscriptions')}>
+            <MonthlySubscriptionsManagementPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/monthly-subscriptions/:id"
+        element={
+          <ProtectedRoute allowedRoles={getAllowedRoles('/monthly-subscriptions/:id')}>
+            <DashboardLayout>
+              <MonthlySubscriptionDetailPage />
+            </DashboardLayout>
           </ProtectedRoute>
         }
       />

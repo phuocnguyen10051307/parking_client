@@ -15,6 +15,9 @@ import MyParkingSessionsPage from '@/features/parking-sessions/pages/my-parking-
 import MyParkingSessionDetailPage from '@/features/parking-sessions/pages/my-parking-session-detail-page';
 import PublicPricingPage from '@/features/pricing/pages/public-pricing-page';
 import UserHomePage from '@/features/home/pages/home-page';
+import CreateMonthlySubscriptionPage from '@/features/monthly-subscriptions/pages/create-monthly-subscription-page';
+import MyMonthlySubscriptionsPage from '@/features/monthly-subscriptions/pages/my-monthly-subscriptions-page';
+import MonthlySubscriptionDetailPage from '@/features/monthly-subscriptions/pages/monthly-subscription-detail-page';
 import type { UserRole } from '@/types/user-role';
 
 const userAllowedRoles: UserRole[] = ['USER'];
@@ -37,8 +40,11 @@ export function UserRouter() {
       <Route path="my-vehicles" element={<MyVehiclesPage />} />
       <Route path="my-reservations" element={<MyReservationsPage />} />
       <Route path="my-reservations/:id" element={<MyReservationDetailPage />} />
+      <Route path="my-monthly-subscriptions" element={<MyMonthlySubscriptionsPage />} />
+      <Route path="my-monthly-subscriptions/:id" element={<MonthlySubscriptionDetailPage />} />
       <Route path="parking-map" element={<ParkingMapPage />} />
       <Route path="create-reservation" element={<CreateReservationPage />} />
+      <Route path="create-monthly-subscription" element={<CreateMonthlySubscriptionPage />} />
       <Route path="my-feedbacks" element={<MyFeedbackPage />} />
       <Route path="create-feedback" element={<CreateFeedbackPage />} />
       <Route path="my-sessions" element={<MyParkingSessionsPage />} />
