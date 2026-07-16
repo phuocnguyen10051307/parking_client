@@ -1,9 +1,13 @@
-﻿import axios from 'axios';
+import axios from 'axios';
 
 import { clearAuthSession } from '@/features/auth/utils/auth-session';
 
+const apiBaseUrl =
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.MODE === 'development' ? 'http://localhost:3000/v1' : '/v1');
+
 const api = axios.create({
-  baseURL: import.meta.env.MODE === 'development' ? 'http://localhost:3000/v1' : '/v1',
+  baseURL: apiBaseUrl,
   withCredentials: true,
 });
 
