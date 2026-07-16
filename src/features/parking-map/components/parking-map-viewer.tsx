@@ -598,7 +598,7 @@ export function ParkingMapViewer({ floors, selectedFloorId, showVehicleDetails =
         }
       });
 
-      const label = createFloorLabel(`${formatFloorLabel(floor.floorNumber)} · ${floor.occupiedCount}/${floor.totalCount}`);
+      const label = createFloorLabel(`${formatFloorLabel(floor.floorNumber)} ï¿½ ${floor.occupiedCount}/${floor.totalCount}`);
       label.position.set(-9, 0.038, 14.4);
       label.rotation.x = -Math.PI / 2;
       label.renderOrder = 11;
