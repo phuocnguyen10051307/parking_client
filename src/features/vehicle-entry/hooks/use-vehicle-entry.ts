@@ -1,5 +1,5 @@
-import axios from 'axios';
 import { useEffect, useMemo, useState } from 'react';
+import axios from 'axios';
 import { toast } from 'sonner';
 
 import { compactLicensePlate, formatLicensePlate } from '@/lib/license-plate';
@@ -18,7 +18,7 @@ const getSlotZoneId = (slot: EntrySlot) => slot.zone?.id ?? '';
 
 export function useVehicleEntry() {
   const [licensePlate, setLicensePlateState] = useState('');
-  const [vehicleType] = useState(DEFAULT_VEHICLE_TYPE);
+  const [defaultVehicleType] = useState(DEFAULT_VEHICLE_TYPE);
   const [entryGate] = useState(DEFAULT_ENTRY_GATE);
   const [entryImage, setEntryImage] = useState<File | null>(null);
   const [isCheckingIn, setIsCheckingIn] = useState(false);
@@ -127,6 +127,8 @@ export function useVehicleEntry() {
     setLicensePlateState(formatLicensePlate(value));
   };
 
+  const vehicleType = vehicle?.vehicleType ?? defaultVehicleType;
+
   const loadAvailableSlots = async () => {
     try {
       const data = await vehicleEntryApi.getAvailableSlots(vehicleType);
@@ -180,11 +182,13 @@ export function useVehicleEntry() {
         setVehicle(matchedVehicle);
       }
 
+      const resolvedVehicleType = matchedVehicle?.vehicleType ?? vehicleType;
+
       await vehicleEntryApi.checkInByPlate({
         plate,
         image: entryImage,
         slotId: selectedSlot.id,
-        vehicleType,
+        vehicleType: resolvedVehicleType,
         vehicleId: matchedVehicle?.id ?? vehicle?.id,
         entryGate,
       });
