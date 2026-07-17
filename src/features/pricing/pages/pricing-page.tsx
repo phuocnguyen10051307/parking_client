@@ -9,7 +9,6 @@ import { pricingApi } from '../api/pricing-api';
 import { PricingCard } from '../components/pricing-card';
 import { PricingTable } from '../components/pricing-table';
 import { FeeCalculator } from '../components/fee-calculator';
-import { PricingNote } from '../components/pricing-note';
 import type { PricingPolicy, PricingPolicyPayload } from '../types/pricing';
 
 const DEFAULT_FORM: PricingPolicyPayload = {
@@ -319,9 +318,6 @@ export default function PricingPage() {
           <FeeCalculator policy={activeCarPolicy} />
         </div>
 
-        <div className="mt-8">
-          <PricingNote policy={activeCarPolicy} />
-        </div>
       </div>
     </DashboardLayout>
   );

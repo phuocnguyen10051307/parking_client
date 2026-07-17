@@ -15,6 +15,10 @@ export type ExitPayment = {
   id: string;
   amount: number;
   method: 'CASH' | 'BANKING' | 'E_WALLET';
+  provider?: string | null;
+  orderCode?: string | null;
+  providerPaymentId?: string | null;
+  checkoutUrl?: string | null;
   status: 'PENDING' | 'PAID' | 'FAILED';
   paidAt?: string | null;
   createdAt: string;
@@ -34,5 +38,25 @@ export type ExitSession = {
   totalFee: number | null;
   vehicle: ExitVehicle;
   slot: ExitSlot;
+  payment?: ExitPayment | null;
+};
+
+export type ExitFeeEstimate = {
+  session: ExitSession;
+  totalFee: number;
+  paymentRequired: boolean;
+  monthlySubscriptionApplied: boolean;
+  applicableMonthlySubscription?: {
+    id: string;
+    startDate: string;
+    endDate: string;
+    status: string;
+  } | null;
+  payment?: ExitPayment | null;
+};
+
+export type ExitPaymentLink = ExitFeeEstimate & {
+  checkoutUrl: string | null;
+  qrCode: string | null;
   payment?: ExitPayment | null;
 };

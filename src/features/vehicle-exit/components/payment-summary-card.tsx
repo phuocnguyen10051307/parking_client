@@ -1,7 +1,7 @@
 import { calculateEstimatedParkingFee, formatVnd, getDefaultCarPricingPolicy } from '@/lib/pricing';
 import type { PricingPolicy } from '@/features/pricing/types/pricing';
 
-import type { ExitPayment } from '../types/vehicle-exit.type';
+import type { ExitFeeEstimate, ExitPayment } from '../types/vehicle-exit.type';
 
 type Props = {
   entryTime: string;
@@ -9,9 +9,14 @@ type Props = {
   vehicleType?: string;
   pricingPolicy?: PricingPolicy | null;
   payment?: ExitPayment | null;
+  feeEstimate?: ExitFeeEstimate | null;
   paymentMethod: 'CASH' | 'BANKING' | 'E_WALLET';
   onPaymentMethodChange: (method: 'CASH' | 'BANKING' | 'E_WALLET') => void;
   isCheckingOut?: boolean;
+  isEstimatingFee?: boolean;
+  isCreatingPaymentLink?: boolean;
+  onEstimateFee: () => void;
+  onCreatePaymentLink: () => void;
   onCheckout: () => void;
 };
 
@@ -21,14 +26,20 @@ export function PaymentSummaryCard({
   vehicleType,
   pricingPolicy,
   payment,
+  feeEstimate,
   paymentMethod,
   onPaymentMethodChange,
   isCheckingOut = false,
+  isEstimatingFee = false,
+  isCreatingPaymentLink = false,
+  onEstimateFee,
+  onCreatePaymentLink,
   onCheckout,
 }: Props) {
   const activePolicy = pricingPolicy ?? getDefaultCarPricingPolicy();
   const displayedFee =
-    totalFee == null ? calculateEstimatedParkingFee(entryTime, new Date(), vehicleType, activePolicy) : Number(totalFee);
+    feeEstimate?.totalFee ??
+    (totalFee == null ? calculateEstimatedParkingFee(entryTime, new Date(), vehicleType, activePolicy) : Number(totalFee));
 
   return (
     <div className="rounded-3xl border bg-white shadow-sm">
@@ -43,6 +54,12 @@ export function PaymentSummaryCard({
           <div>Evening: {formatVnd(activePolicy.eveningBlockFee)} / 2 hours</div>
           <div>Overnight: {formatVnd(activePolicy.overnightFlatFee)}</div>
         </div>
+
+        {feeEstimate?.monthlySubscriptionApplied ? (
+          <div className="rounded-2xl bg-emerald-50 p-4 text-sm text-emerald-800">
+            Monthly pass applied. This parking session is free because the pass was already active at check-in.
+          </div>
+        ) : null}
 
         <label className="block text-sm text-slate-600">
           Payment method
@@ -65,18 +82,46 @@ export function PaymentSummaryCard({
 
         {payment ? (
           <div className="rounded-2xl bg-emerald-50 p-4 text-sm text-emerald-800">
-            Paid via {payment.method} at {payment.paidAt ? new Date(payment.paidAt).toLocaleString() : '-'}
+            Payment status: {payment.status}
+            <br />
+            Method: {payment.method}
+            <br />
+            Paid at: {payment.paidAt ? new Date(payment.paidAt).toLocaleString() : '-'}
           </div>
         ) : null}
 
-        {totalFee == null ? <p className="text-sm text-slate-500">Estimated until checkout.</p> : null}
+        {feeEstimate ? (
+          <p className="text-sm text-slate-500">
+            Fee checked at {new Date().toLocaleTimeString()}. For online payment, the amount is frozen once PayOS link is created.
+          </p>
+        ) : (
+          <p className="text-sm text-slate-500">Use Check Current Fee before confirming exit.</p>
+        )}
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <button
+            onClick={onEstimateFee}
+            disabled={isEstimatingFee}
+            className="rounded-xl border border-slate-200 py-3 font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isEstimatingFee ? 'Checking...' : 'Check Current Fee'}
+          </button>
+
+          <button
+            onClick={onCreatePaymentLink}
+            disabled={isCreatingPaymentLink || paymentMethod === 'CASH'}
+            className="rounded-xl border border-blue-200 py-3 font-semibold text-blue-900 transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isCreatingPaymentLink ? 'Opening PayOS...' : 'Pay with PayOS'}
+          </button>
+        </div>
 
         <button
           onClick={onCheckout}
           disabled={isCheckingOut}
           className="mt-4 w-full rounded-xl bg-blue-900 py-3 font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300"
         >
-          {isCheckingOut ? 'Completing Exit...' : 'Complete Exit & Record Payment'}
+          {isCheckingOut ? 'Completing Exit...' : 'Complete Exit'}
         </button>
       </div>
     </div>

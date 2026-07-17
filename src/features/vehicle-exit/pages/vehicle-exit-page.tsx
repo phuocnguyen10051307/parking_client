@@ -16,8 +16,13 @@ export default function VehicleExitPage() {
     setPaymentMethod,
     setExitImage,
     isCheckingOut,
+    isEstimatingFee,
+    isCreatingPaymentLink,
+    feeEstimate,
     handlePlateDetected,
     handleSearchSession,
+    handleEstimateFee,
+    handleCreatePaymentLink,
     handleCheckout,
   } = useVehicleExit();
 
@@ -27,7 +32,7 @@ export default function VehicleExitPage() {
         <div>
           <div className="text-3xl font-semibold text-blue-900">Vehicle Exit</div>
 
-          <p className="mt-2 text-slate-500">Process vehicle departure and capture payment details.</p>
+          <p className="mt-2 text-slate-500">Process vehicle departure, check the current fee, then collect payment.</p>
         </div>
 
         <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
@@ -51,9 +56,14 @@ export default function VehicleExitPage() {
                 vehicleType={session.vehicle.vehicleType}
                 pricingPolicy={pricingPolicy}
                 payment={session.payment}
+                feeEstimate={feeEstimate}
                 paymentMethod={paymentMethod}
                 onPaymentMethodChange={setPaymentMethod}
                 isCheckingOut={isCheckingOut}
+                isEstimatingFee={isEstimatingFee}
+                isCreatingPaymentLink={isCreatingPaymentLink}
+                onEstimateFee={handleEstimateFee}
+                onCreatePaymentLink={handleCreatePaymentLink}
                 onCheckout={handleCheckout}
               />
             )}

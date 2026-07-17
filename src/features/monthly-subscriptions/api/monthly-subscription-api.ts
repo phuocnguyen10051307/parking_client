@@ -15,7 +15,12 @@ export const monthlySubscriptionApi = {
     const res = await api.get<{ data: MonthlySubscription }>(`/monthly-subscriptions/${id}`);
     return res.data.data;
   },
-  create: async (payload: { vehicleId: string; startDate: string; durationMonths?: number }) => {
+  create: async (payload: {
+    vehicleId: string;
+    startDate: string;
+    durationMonths?: number;
+    paymentMethod?: 'CASH' | 'BANKING' | 'E_WALLET';
+  }) => {
     const res = await api.post<{ data: MonthlySubscription }>('/monthly-subscriptions', payload);
     return res.data.data;
   },

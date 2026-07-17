@@ -7,7 +7,7 @@ import { pricingApi } from '@/features/pricing/api/pricing-api';
 import type { PricingPolicy } from '@/features/pricing/types/pricing';
 
 import { vehicleExitApi } from '../api/vehicle-exit-api';
-import type { ExitSession } from '../types/vehicle-exit.type';
+import type { ExitFeeEstimate, ExitSession } from '../types/vehicle-exit.type';
 
 const DEFAULT_EXIT_GATE = 'B1';
 
@@ -18,6 +18,9 @@ export function useVehicleExit() {
   const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'BANKING' | 'E_WALLET'>('CASH');
   const [exitImage, setExitImage] = useState<File | null>(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [isEstimatingFee, setIsEstimatingFee] = useState(false);
+  const [isCreatingPaymentLink, setIsCreatingPaymentLink] = useState(false);
+  const [feeEstimate, setFeeEstimate] = useState<ExitFeeEstimate | null>(null);
 
   const setLicensePlate = (value: string) => {
     setLicensePlateState(formatLicensePlate(value));
@@ -38,7 +41,7 @@ export function useVehicleExit() {
       }
     };
 
-    loadPricingPolicy();
+    void loadPricingPolicy();
   }, [session?.vehicle?.vehicleType]);
 
   const searchSessionByPlate = async (plateValue: string) => {
@@ -57,6 +60,7 @@ export function useVehicleExit() {
 
       if (matchedSession) {
         setSession(matchedSession);
+        setFeeEstimate(null);
         toast.success('Parking session found');
         return;
       }
@@ -65,6 +69,7 @@ export function useVehicleExit() {
       const matchedVehicle = vehicles.find((item) => compactLicensePlate(item.licensePlate) === plate);
 
       setSession(null);
+      setFeeEstimate(null);
       setPricingPolicy(null);
 
       if (matchedVehicle) {
@@ -90,6 +95,67 @@ export function useVehicleExit() {
     await searchSessionByPlate(formattedPlate);
   };
 
+  const handleEstimateFee = async () => {
+    if (!session) {
+      toast.error('No parking session selected');
+      return;
+    }
+
+    try {
+      setIsEstimatingFee(true);
+      const estimate = await vehicleExitApi.estimateFee(session.id);
+      setFeeEstimate(estimate);
+      setSession(estimate.session);
+      toast.success('Current parking fee updated');
+    } catch (error) {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message || 'Failed to estimate parking fee'
+        : 'Failed to estimate parking fee';
+
+      toast.error(message);
+    } finally {
+      setIsEstimatingFee(false);
+    }
+  };
+
+  const handleCreatePaymentLink = async () => {
+    if (!session) {
+      toast.error('No parking session selected');
+      return;
+    }
+
+    if (paymentMethod === 'CASH') {
+      toast.warning('Choose Banking or E-wallet to create a PayOS payment link');
+      return;
+    }
+
+    try {
+      setIsCreatingPaymentLink(true);
+      const result = await vehicleExitApi.createPaymentLink({
+        id: session.id,
+        paymentMethod,
+      });
+
+      setFeeEstimate(result);
+      setSession(result.session);
+
+      if (result.checkoutUrl) {
+        window.location.href = result.checkoutUrl;
+        return;
+      }
+
+      toast.success('No online payment required for this session');
+    } catch (error) {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message || 'Failed to create payment link'
+        : 'Failed to create payment link';
+
+      toast.error(message);
+    } finally {
+      setIsCreatingPaymentLink(false);
+    }
+  };
+
   const handleCheckout = async () => {
     if (!session) {
       toast.error('No parking session selected');
@@ -110,8 +176,9 @@ export function useVehicleExit() {
         paymentMethod,
       });
 
-      toast.success('Vehicle checked out and payment recorded successfully');
+      toast.success('Vehicle checked out successfully');
       setSession(null);
+      setFeeEstimate(null);
       setLicensePlateState('');
       setExitImage(null);
       setPricingPolicy(null);
@@ -136,8 +203,13 @@ export function useVehicleExit() {
     setPaymentMethod,
     setExitImage,
     isCheckingOut,
+    isEstimatingFee,
+    isCreatingPaymentLink,
+    feeEstimate,
     handlePlateDetected,
     handleSearchSession,
+    handleEstimateFee,
+    handleCreatePaymentLink,
     handleCheckout,
   };
 }

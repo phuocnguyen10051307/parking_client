@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { pricingApi } from '../api/pricing-api';
 import { PublicPricingCard } from '../components/public-pricing-card';
 import { PublicPricingFilter } from '../components/public-pricing-filter';
-import { PublicPricingNote } from '../components/public-pricing-note';
 import type { PricingPolicy } from '../types/pricing';
 
 export default function PublicPricingPage() {
@@ -80,13 +79,7 @@ export default function PublicPricingPage() {
       )}
 
       {/* Có pricing */}
-      {!loading && vehicleType !== '' && policy && (
-        <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
-          <PublicPricingCard pricing={policy} />
-
-          <PublicPricingNote pricing={policy} />
-        </div>
-      )}
+      {!loading && vehicleType !== '' && policy && <PublicPricingCard pricing={policy} />}
 
       {/* Không có pricing */}
       {!loading && vehicleType !== '' && !policy && (
