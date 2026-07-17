@@ -10,11 +10,8 @@ export default function VehicleEntryPage() {
   const {
     licensePlate,
     setLicensePlate,
-    vehicleType,
-    entryGate,
     setEntryImage,
     isCheckingIn,
-    vehicle,
     floorOptions,
     zoneOptions,
     selectedFloorId,
@@ -42,9 +39,6 @@ export default function VehicleEntryPage() {
           <VehicleEntryForm
             licensePlate={licensePlate}
             setLicensePlate={setLicensePlate}
-            vehicleType={vehicleType}
-            entryGate={entryGate}
-            vehicle={vehicle}
             onImageCaptured={setEntryImage}
           />
 

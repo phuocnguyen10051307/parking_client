@@ -2,23 +2,15 @@ import { Car } from 'lucide-react';
 
 import { LicensePlateCamera } from './license-plate-camera';
 
-import type { EntryVehicle } from '../types/vehicle-entry.type';
-
 type Props = {
   licensePlate: string;
   setLicensePlate: (value: string) => void;
-  vehicleType: string;
-  entryGate: string;
-  vehicle: EntryVehicle | null;
   onImageCaptured: (file: File | null) => void;
 };
 
 export function VehicleEntryForm({
   licensePlate,
   setLicensePlate,
-  vehicleType,
-  entryGate,
-  vehicle,
   onImageCaptured,
 }: Props) {
   return (
