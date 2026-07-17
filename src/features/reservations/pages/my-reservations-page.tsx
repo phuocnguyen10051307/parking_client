@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
+import { formatDateTimeVietnam } from '@/lib/datetime';
+
 import { reservationApi } from '../api/reservation-api';
 import { useReservations } from '../hooks/use-reservations';
 import type { Reservation } from '../types/reservation.type';
@@ -8,8 +10,7 @@ import type { Reservation } from '../types/reservation.type';
 const formatDateTime = (value?: string) => {
   if (!value) return '--';
 
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleString();
+  return formatDateTimeVietnam(value);
 };
 
 export default function MyReservationsPage() {

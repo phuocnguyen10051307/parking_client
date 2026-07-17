@@ -1,6 +1,8 @@
 import { CalendarDays, CarFront, Clock3, MapPin } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 
+import { formatDateTimeVietnam } from '@/lib/datetime';
+
 import { useReservationDetail } from '../hooks/use-reservation-detail';
 
 export default function MyReservationDetailPage() {
@@ -57,19 +59,19 @@ export default function MyReservationDetailPage() {
         <SummaryCard
           icon={<Clock3 size={18} />}
           title="Created At"
-          value={new Date(reservation.createdAt).toLocaleString()}
+          value={formatDateTimeVietnam(reservation.createdAt)}
         />
 
         <SummaryCard
           icon={<CalendarDays size={18} />}
           title="Start Time"
-          value={new Date(reservation.startTime).toLocaleString()}
+          value={formatDateTimeVietnam(reservation.startTime)}
         />
 
         <SummaryCard
           icon={<CalendarDays size={18} />}
           title="End Time"
-          value={new Date(reservation.endTime).toLocaleString()}
+          value={formatDateTimeVietnam(reservation.endTime)}
         />
       </div>
 

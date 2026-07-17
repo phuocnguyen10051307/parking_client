@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import { DashboardLayout } from '@/app/layouts/dashboard-layout';
+import { formatDateTimeVietnam } from '@/lib/datetime';
 
 import { reservationApi } from '../api/reservation-api';
 import { useReservationDetail } from '../hooks/use-reservation-detail';
@@ -94,19 +95,19 @@ export default function ReservationDetailPage() {
           <SummaryCard
             icon={<Clock3 size={18} />}
             title="Created At"
-            value={new Date(reservation.createdAt).toLocaleString()}
+            value={formatDateTimeVietnam(reservation.createdAt)}
           />
 
           <SummaryCard
             icon={<CalendarDays size={18} />}
             title="Start Time"
-            value={new Date(reservation.startTime).toLocaleString()}
+            value={formatDateTimeVietnam(reservation.startTime)}
           />
 
           <SummaryCard
             icon={<CalendarDays size={18} />}
             title="End Time"
-            value={new Date(reservation.endTime).toLocaleString()}
+            value={formatDateTimeVietnam(reservation.endTime)}
           />
         </div>
 

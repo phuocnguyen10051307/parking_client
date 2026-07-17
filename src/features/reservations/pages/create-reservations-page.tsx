@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 
 import { slotsApi } from '@/features/slots/api/slots-api';
 import { vehiclesApi } from '@/features/vehicles/api/vehicles-api';
+import { formatDateTimeVietnam } from '@/lib/datetime';
 import { getErrorMessage } from '@/lib/error';
 
 import { reservationApi } from '../api/reservation-api';
@@ -49,7 +50,7 @@ export default function CreateReservationPage() {
       return 'Automatically set to 1 hour after your selected arrival time.';
     }
 
-    return new Date(endTime).toLocaleString();
+    return formatDateTimeVietnam(endTime);
   }, [endTime]);
 
   useEffect(() => {

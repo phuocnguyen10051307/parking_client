@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import { DashboardLayout } from '@/app/layouts/dashboard-layout';
+import { formatDateTimeVietnam } from '@/lib/datetime';
 
 import { reservationApi } from '../api/reservation-api';
 import { useReservations } from '../hooks/use-reservations';
@@ -73,8 +74,8 @@ export default function ReservationManagementPage() {
                   <td className="p-4">{reservation.user?.fullName}</td>
                   <td>{reservation.vehicle?.licensePlate}</td>
                   <td>{reservation.slot?.slotCode}</td>
-                  <td>{new Date(reservation.startTime).toLocaleString()}</td>
-                  <td>{new Date(reservation.endTime).toLocaleString()}</td>
+                  <td>{formatDateTimeVietnam(reservation.startTime)}</td>
+                  <td>{formatDateTimeVietnam(reservation.endTime)}</td>
 
                   <td>
                     <span className="rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700">

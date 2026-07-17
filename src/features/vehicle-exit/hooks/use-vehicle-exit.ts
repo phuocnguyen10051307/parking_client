@@ -53,10 +53,16 @@ export function useVehicleExit() {
     }
 
     try {
-      const sessions = await vehicleExitApi.getActiveSessions();
-      const matchedSession = sessions.find(
-        (item: ExitSession) => compactLicensePlate(item.vehicle.licensePlate) === plate
-      );
+      const [sessions, vehicles] = await Promise.all([
+        vehicleExitApi.getActiveSessions(),
+        vehicleExitApi.findVehicleByPlate(plate),
+      ]);
+      const matchedVehicle = vehicles.find((item) => compactLicensePlate(item.licensePlate) === plate) ?? null;
+      const matchedSession = sessions.find((item: ExitSession) => {
+        const sessionPlate = compactLicensePlate(item.vehicle?.licensePlate);
+
+        return sessionPlate === plate || (matchedVehicle ? item.vehicleId === matchedVehicle.id : false);
+      });
 
       if (matchedSession) {
         setSession(matchedSession);
@@ -64,9 +70,6 @@ export function useVehicleExit() {
         toast.success('Parking session found');
         return;
       }
-
-      const vehicles = await vehicleExitApi.findVehicleByPlate(plate);
-      const matchedVehicle = vehicles.find((item) => compactLicensePlate(item.licensePlate) === plate);
 
       setSession(null);
       setFeeEstimate(null);
