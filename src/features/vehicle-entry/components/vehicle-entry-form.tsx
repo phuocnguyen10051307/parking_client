@@ -5,8 +5,6 @@ import { LicensePlateCamera } from './license-plate-camera';
 
 type Props = {
   licensePlate: string;
-  vehicleType: string;
-  entryGate: string;
   vehicle: EntryVehicle | null;
   setLicensePlate: (value: string) => void;
   onImageCaptured: (file: File | null) => void;
@@ -14,8 +12,6 @@ type Props = {
 
 export function VehicleEntryForm({
   licensePlate,
-  vehicleType,
-  entryGate,
   vehicle,
   setLicensePlate,
   onImageCaptured,
@@ -43,18 +39,6 @@ export function VehicleEntryForm({
           <p className="mt-2 text-sm italic text-slate-400">
             Review the detected plate and edit it before confirming check-in.
           </p>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-2xl bg-slate-100 p-4">
-            <p className="text-sm uppercase tracking-wide text-slate-500">Vehicle Type</p>
-            <p className="mt-2 text-3xl font-semibold text-slate-900">{vehicleType}</p>
-          </div>
-
-          <div className="rounded-2xl bg-slate-100 p-4">
-            <p className="text-sm uppercase tracking-wide text-slate-500">Entry Gate</p>
-            <p className="mt-2 text-3xl font-semibold text-slate-900">{entryGate}</p>
-          </div>
         </div>
 
         <div className="rounded-2xl border border-blue-100 bg-blue-50 p-5">

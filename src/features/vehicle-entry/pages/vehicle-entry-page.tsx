@@ -10,8 +10,6 @@ export default function VehicleEntryPage() {
   const {
     licensePlate,
     setLicensePlate,
-    vehicleType,
-    entryGate,
     vehicle,
     setEntryImage,
     isCheckingIn,
@@ -41,8 +39,6 @@ export default function VehicleEntryPage() {
         <div className="grid gap-8 lg:grid-cols-2">
           <VehicleEntryForm
             licensePlate={licensePlate}
-            vehicleType={vehicleType}
-            entryGate={entryGate}
             vehicle={vehicle}
             setLicensePlate={setLicensePlate}
             onImageCaptured={setEntryImage}
